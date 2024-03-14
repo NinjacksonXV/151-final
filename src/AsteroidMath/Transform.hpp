@@ -1,0 +1,8 @@
+
+namespace AsteroidMath
+{
+    class Transform
+    {
+
+    };
+}
