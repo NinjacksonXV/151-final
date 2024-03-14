@@ -5,10 +5,15 @@ namespace AsteroidMath
     class Vector2
     {
         public:
-            float x;
-            float y;
-            float length;
-            
+
+            float getX() const;
+            float getY() const;
+            float getLength() const;
+
+            void setX(float x);
+            void setY(float y);
+            void setLength(float length);
+
             static const AsteroidMath::Vector2 UP;
             static const AsteroidMath::Vector2 DOWN;
             static const AsteroidMath::Vector2 LEFT;
@@ -21,10 +26,14 @@ namespace AsteroidMath
             ~Vector2();
             
             void rotate(float radians);
-            void setLength(float length);
             void limitLength(float limit);
+            void normalize();
 
         private:
+            float x;
+            float y;
+            float length;
+
             void updateLength();
     };
 };
