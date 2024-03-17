@@ -4,10 +4,9 @@
 sf::Transform transform = sf::Transform::Identity;
 sf::Vector2f velocity;
 
-void update(float delta)
+void Player::update(float delta)
 {
-
-    transform.rotate(1 * delta);
+    rotate(1 * delta);
 }
 
 

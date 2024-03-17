@@ -1,6 +1,6 @@
-#include "GameObject.hpp"
+#include "Object2D.hpp"
 
-class Player : public GameObject
+class Player : public Object2D
 {
-    void update(float delta);
+    void update(float delta) override;
 };
