@@ -52,6 +52,14 @@ void AsteroidMath::Vector2::setLength(float length)
     this->length = length;
 }
 
+AsteroidMath::Vector2 &AsteroidMath::Vector2::operator+=(const Vector2 &vector)
+{
+    this->x += vector.getX();
+    this->y += vector.getY();
+
+    return *this;
+}
+
 void AsteroidMath::Vector2::rotate(float radians)
 {
     // Vector rotation formula

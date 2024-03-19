@@ -18,6 +18,14 @@ namespace AsteroidMath
             void setY(float y);
             void setLength(float length);
 
+            Vector2& operator+=(const Vector2& vector);
+            template <typename T>
+            Vector2& operator*(const T scalar)
+            {
+                this-> x *= T;
+                this-> y *= T;
+            }
+
             static const AsteroidMath::Vector2 UP;
             static const AsteroidMath::Vector2 DOWN;
             static const AsteroidMath::Vector2 LEFT;
