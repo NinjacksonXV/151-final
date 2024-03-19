@@ -1,11 +1,25 @@
 #include "Player.hpp"
 #include <SFML/Graphics.hpp>
-// TO-DO: Replace with AsteroidMath::Transform
-sf::Transform transform = sf::Transform::Identity;
-sf::Vector2f velocity;
+
+int turnSpeed = 3;
+int maxSpeed = 6;
 
 void Player::update(float delta)
 {
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
+    {
+        velocity += transform * AsteroidMath::Vector2::UP * delta;
+    }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
+    {
+        rotate(turnSpeed * delta);
+    }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
+    {
+        rotate(turnSpeed * delta * -1);
+    }
+
+    velocity.limitLength(maxSpeed);
     rotate(1 * delta);
 }
 
