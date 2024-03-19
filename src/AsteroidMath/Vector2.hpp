@@ -1,4 +1,5 @@
 #include <math.h>
+#include <iostream>
 
 namespace AsteroidMath
 {
@@ -35,7 +36,9 @@ namespace AsteroidMath
             Vector2();
             Vector2(float x, float y);
             ~Vector2();
-            
+
+            friend std::ostream& operator<<(std::ostream& out, const AsteroidMath::Vector2& vector);
+            //TO-DO: Type casting from AsteroidMath::Vector2 to sf::Vector2f
             void rotate(float radians);
             void limitLength(float limit);
             void normalize();

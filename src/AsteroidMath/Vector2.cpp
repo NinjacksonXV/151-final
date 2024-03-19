@@ -13,6 +13,11 @@ AsteroidMath::Vector2::Vector2(float x, float y)
     this->updateLength();
 }
 
+std::ostream& AsteroidMath::operator<<(std::ostream& out, const AsteroidMath::Vector2& vector)
+{
+    out << '(' << vector.getX() << ", " << vector.getY() << ')';
+}
+
 float AsteroidMath::Vector2::getX() const
 {
     return this->x;
