@@ -8,8 +8,7 @@ namespace AsteroidMath
 
             void rotate(float radians); //simply rotate the two unit vectors
 
-            AsteroidMath::Vector2 operator*(AsteroidMath::Vector2 vector); //matrix multiplication
-
+            AsteroidMath::Vector2 operator*(const AsteroidMath::Vector2& vector); 
 
         private:
         // for now, these should always be unit vectors.
