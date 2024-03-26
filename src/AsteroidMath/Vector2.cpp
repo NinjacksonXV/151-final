@@ -6,6 +6,11 @@ const AsteroidMath::Vector2 AsteroidMath::Vector2::LEFT = AsteroidMath::Vector2(
 const AsteroidMath::Vector2 AsteroidMath::Vector2::RIGHT = AsteroidMath::Vector2(1, 0);
 const AsteroidMath::Vector2 AsteroidMath::Vector2::ZERO = AsteroidMath::Vector2(0, 0);
 
+AsteroidMath::Vector2::Vector2()
+{
+    *this = AsteroidMath::Vector2::ZERO;
+}
+
 AsteroidMath::Vector2::Vector2(float x, float y)
 {
     this->x = x;
@@ -16,6 +21,7 @@ AsteroidMath::Vector2::Vector2(float x, float y)
 std::ostream& AsteroidMath::operator<<(std::ostream& out, const AsteroidMath::Vector2& vector)
 {
     out << '(' << vector.getX() << ", " << vector.getY() << ')';
+    return out;
 }
 
 float AsteroidMath::Vector2::getX() const
@@ -49,7 +55,7 @@ void AsteroidMath::Vector2::setY(float y)
     invalidateLength();
 }
 
-void AsteroidMath::Vector2::setLength(float length)
+void AsteroidMath::Vector2::setLength(float length) // Re-do this, this makes no sense mathematically.
 {
     float ratio = this->length / length;
     this->x *= ratio;
