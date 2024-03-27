@@ -99,6 +99,16 @@ void AsteroidMath::Vector2::updateLength()
     length = sqrt(pow(this->x, 2) + pow(this->y, 2));
 }
 
+float AsteroidMath::Vector2::getAngleTo(const AsteroidMath::Vector2 &vector)
+{
+    return 0.0f;
+}
+
+float AsteroidMath::Vector2::dotProduct(const AsteroidMath::Vector2 &vector)
+{
+    return (this->getX() * vector.getX()) + (this->getY() * vector.getY());
+}
+
 bool AsteroidMath::Vector2::isCurrentLengthPreCalculated() const
 {
     return (std::isnan(this->length)); // Check if NaN
@@ -106,5 +116,5 @@ bool AsteroidMath::Vector2::isCurrentLengthPreCalculated() const
 
 void AsteroidMath::Vector2::invalidateLength()
 {
-    this->length = 0.0f / 0.0f;
+    this->length = 0.0f / 0.0f; // Set to NaN
 }

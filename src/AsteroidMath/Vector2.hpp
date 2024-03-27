@@ -55,7 +55,7 @@ namespace AsteroidMath
         void updateLength();
 
         float getAngleTo(const AsteroidMath::Vector2 &vector);
-        float dotProduct(AsteroidMath::Vector2 &vector); // For now, this cannot be a const ref, since we need to call getLength() on the input vector. 
+        float dotProduct(const AsteroidMath::Vector2 &vector); 
 
         bool isCurrentLengthPreCalculated() const;
         void invalidateLength();
