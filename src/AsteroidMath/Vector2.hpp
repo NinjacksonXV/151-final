@@ -1,3 +1,4 @@
+#define _USE_MATH_DEFINES
 #include <math.h>
 #include <iostream>
 #include <SFML/System.hpp>
@@ -19,18 +20,20 @@ namespace AsteroidMath
         void setX(float x);
         void setY(float y);
 
-        AsteroidMath::Vector2 &operator+=(const Vector2 &vector);
-        AsteroidMath::Vector2 operator*(auto scalar)
+        void operator=(const sf::Vector2f &sfVector);
+        void operator+=(const Vector2 &vector);
+        AsteroidMath::Vector2 operator*(auto scalar) const
         {
             // AsteroidMath::Vector2 returnVector(this->x * static_cast<float>(scalar), this->y * static_cast<float>(scalar));
             return {this->x * static_cast<float>(scalar), this->y * static_cast<float>(scalar)};
         }
+
         void operator*=(auto scalar)
         {
             this->setX(this->x * static_cast<float>(scalar));
             this->setY(this->y * static_cast<float>(scalar));
         }
-        AsteroidMath::Vector2 operator/(auto scalar)
+        AsteroidMath::Vector2 operator/(auto scalar) const
         {
             return {this->x / static_cast<float>(scalar), this->y / static_cast<float>(scalar)};
         }
@@ -78,4 +81,5 @@ namespace AsteroidMath
         void invalidateLength();
     };
     std::ostream &operator<<(std::ostream &out, const AsteroidMath::Vector2 &vector);
+
 };

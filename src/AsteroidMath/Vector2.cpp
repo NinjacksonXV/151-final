@@ -56,12 +56,16 @@ void AsteroidMath::Vector2::setY(float y)
     invalidateLength();
 }
 
-AsteroidMath::Vector2 &AsteroidMath::Vector2::operator+=(const Vector2 &vector)
+void AsteroidMath::Vector2::operator=(const sf::Vector2f &sfVector)
 {
-    this->x += vector.getX();
-    this->y += vector.getY();
+    this->setX(sfVector.x);
+    this->setY(sfVector.y);
+}
 
-    return *this;
+void AsteroidMath::Vector2::operator+=(const Vector2 &vector)
+{
+    this->setX(this->x + vector.getX());
+    this->setY(this->y + vector.getY());
 }
 
 void AsteroidMath::Vector2::rotate(float radians)
@@ -88,8 +92,8 @@ void AsteroidMath::Vector2::normalize()
 {
     if (this->getLength() != 0)
     {
-        x /= this->getLength();
-        y /= this->getLength();
+        this->setX(this->x / this->getLength());
+        this->setY(this->y / this->getLength());
     }
 }
 
