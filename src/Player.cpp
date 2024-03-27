@@ -8,7 +8,7 @@ void Player::update(float delta)
 {
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
     {
-        velocity += transform * AsteroidMath::Vector2::UP * delta;
+        //velocity += transform * AsteroidMath::Vector2::UP * delta; //TO-DO: Fix this so it works with sf::Transform properly. 
     }
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
     {
