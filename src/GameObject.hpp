@@ -1,6 +1,3 @@
-
-#include "AsteroidMath/Transform.hpp"
-
 class GameObject
 {
 public:

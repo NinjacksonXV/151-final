@@ -1,4 +1,6 @@
-#include <GameObject.hpp>
+#include <SFML/Graphics.hpp>
+#include "GameObject.hpp"
+#include "AsteroidMath/Vector2.hpp"
 
 class Object2D : public GameObject
 {
@@ -9,7 +11,7 @@ class Object2D : public GameObject
 
     protected:
     AsteroidMath::Vector2 position = AsteroidMath::Vector2::ZERO;
-    AsteroidMath::Transform transform = AsteroidMath::Transform::IDENTITY;
+    sf::Transform transform = sf::Transform::Identity;
     AsteroidMath::Vector2 velocity = AsteroidMath::Vector2::ZERO;
     
     void rotate(float radians);
