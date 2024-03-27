@@ -27,8 +27,8 @@ namespace AsteroidMath
         }
         void operator*=(auto scalar)
         {
-            this->x *= static_cast<float>(scalar);
-            this->y *= static_cast<float>(scalar);
+            this->setX(this->x * static_cast<float>(scalar));
+            this->setY(this->y * static_cast<float>(scalar));
         }
         AsteroidMath::Vector2 operator/(auto scalar)
         {
@@ -36,8 +36,8 @@ namespace AsteroidMath
         }
         void operator/=(auto scalar)
         {
-            this->x /= static_cast<float>(scalar);
-            this->y /= static_cast<float>(scalar);
+            this->setX(this->x / static_cast<float>(scalar));
+            this->setY(this->y / static_cast<float>(scalar));
         }
 
         static const AsteroidMath::Vector2 UP;
