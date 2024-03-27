@@ -18,15 +18,26 @@ namespace AsteroidMath
 
         void setX(float x);
         void setY(float y);
-        void setLength(float length);
 
         AsteroidMath::Vector2 &operator+=(const Vector2 &vector);
-        template <typename T>
-        AsteroidMath::Vector2 &operator*(const T scalar)
+        AsteroidMath::Vector2 operator*(auto scalar)
+        {
+            // AsteroidMath::Vector2 returnVector(this->x * static_cast<float>(scalar), this->y * static_cast<float>(scalar));
+            return {this->x * static_cast<float>(scalar), this->y * static_cast<float>(scalar)};
+        }
+        void operator*=(auto scalar)
         {
             this->x *= static_cast<float>(scalar);
             this->y *= static_cast<float>(scalar);
-            return *this;
+        }
+        AsteroidMath::Vector2 operator/(auto scalar)
+        {
+            return {this->x / static_cast<float>(scalar), this->y / static_cast<float>(scalar)};
+        }
+        void operator/=(auto scalar)
+        {
+            this->x /= static_cast<float>(scalar);
+            this->y /= static_cast<float>(scalar);
         }
 
         static const AsteroidMath::Vector2 UP;
@@ -48,16 +59,22 @@ namespace AsteroidMath
         {
             return reinterpret_cast<sf::Vector2f *>(const_cast<Vector2 *>(this));
         }
+
         void rotate(float radians);
-        void limitLength(float limit);
+        AsteroidMath::Vector2 limitLength(float limit);
         void normalize();
 
         void updateLength();
 
-        float getAngleTo(const AsteroidMath::Vector2 &vector);
-        float dotProduct(const AsteroidMath::Vector2 &vector); 
+        float getAngleTo(AsteroidMath::Vector2 &vector);
+        float dotProduct(const AsteroidMath::Vector2 &vector);
 
-        bool isCurrentLengthPreCalculated() const;
+        // Functions to add:
+        // Vector2 reflect(Vector2 normal)
+        // {
+        //     return 2.0f * normal * this->dot(normal) - *this;
+        // };
+        bool isCurrentLengthValid() const;
         void invalidateLength();
     };
     std::ostream &operator<<(std::ostream &out, const AsteroidMath::Vector2 &vector);
