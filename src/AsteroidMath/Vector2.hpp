@@ -20,9 +20,9 @@ namespace AsteroidMath
         void setY(float y);
         void setLength(float length);
 
-        Vector2 &operator+=(const Vector2 &vector);
+        AsteroidMath::Vector2 &operator+=(const Vector2 &vector);
         template <typename T>
-        Vector2 &operator*(const T scalar)
+        AsteroidMath::Vector2 &operator*(const T scalar)
         {
             this->x *= static_cast<float>(scalar);
             this->y *= static_cast<float>(scalar);
@@ -53,6 +53,9 @@ namespace AsteroidMath
         void normalize();
 
         void updateLength();
+
+        float getAngleTo(const AsteroidMath::Vector2 &vector);
+        float dotProduct(AsteroidMath::Vector2 &vector); // For now, this cannot be a const ref, since we need to call getLength() on the input vector. 
 
         bool isCurrentLengthPreCalculated() const;
         void invalidateLength();
