@@ -18,7 +18,7 @@ AsteroidMath::Vector2::Vector2(float x, float y)
     this->updateLength();
 }
 
-std::ostream& AsteroidMath::operator<<(std::ostream& out, const AsteroidMath::Vector2& vector)
+std::ostream &AsteroidMath::operator<<(std::ostream &out, const AsteroidMath::Vector2 &vector)
 {
     out << '(' << vector.getX() << ", " << vector.getY() << ')';
     return out;
@@ -74,8 +74,8 @@ AsteroidMath::Vector2 &AsteroidMath::Vector2::operator+=(const Vector2 &vector)
 void AsteroidMath::Vector2::rotate(float radians)
 {
     // Vector rotation formula
-    float newX = std::cos(radians * this->x) - std::sin(radians * this->y);
-    float newY = std::sin(radians * this->x) + std::cos(radians * this->y);
+    float newX =  this->x * std::cos(radians) -  this->y * std::sin(radians);
+    float newY =  this->x * std::sin(radians) +  this->y * std::cos(radians);
     // this->x = newX;
     // this->y = newY;
     this->setX(newX);
