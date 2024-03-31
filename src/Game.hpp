@@ -1,6 +1,6 @@
 #include <vector>
 #include <SFML/Graphics.hpp>
-#include "GameObject.hpp"
+#include "GameObjects/GameObject.hpp"
 
 class Game
 {

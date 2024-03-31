@@ -1,7 +1,9 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 #include <iostream>
+#include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>
+#pragma once
 
 namespace AsteroidMath
 {
@@ -20,8 +22,10 @@ namespace AsteroidMath
         void setX(float x);
         void setY(float y);
 
+        // void operator=(const AsteroidMath::Vector2 &sfVector);
         void operator=(const sf::Vector2f &sfVector);
         void operator+=(const Vector2 &vector);
+        void operator-=(const Vector2 &vector);
         AsteroidMath::Vector2 operator*(auto scalar) const
         {
             // AsteroidMath::Vector2 returnVector(this->x * static_cast<float>(scalar), this->y * static_cast<float>(scalar));
@@ -81,5 +85,4 @@ namespace AsteroidMath
         void invalidateLength();
     };
     std::ostream &operator<<(std::ostream &out, const AsteroidMath::Vector2 &vector);
-
 };

@@ -68,6 +68,12 @@ void AsteroidMath::Vector2::operator+=(const Vector2 &vector)
     this->setY(this->y + vector.getY());
 }
 
+void AsteroidMath::Vector2::operator-=(const Vector2 &vector)
+{
+    this->setX(this->x - vector.getX());
+    this->setY(this->y - vector.getY());
+}
+
 void AsteroidMath::Vector2::rotate(float radians)
 {
     float newX = this->x * std::cos(radians) - this->y * std::sin(radians);
