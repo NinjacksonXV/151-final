@@ -2,6 +2,7 @@
 #include <SFML/Graphics.hpp>
 #include "GameObjects/GameObject.hpp"
 
+// This class is currently undeveloped. I'll come back to this once I have a better idea of what's needed. 
 class Game
 {
 public:

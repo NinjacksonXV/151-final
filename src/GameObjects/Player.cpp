@@ -1,6 +1,7 @@
 #include "Player.hpp"
 #include "../Utilities.hpp"
 
+// Script variables are here for ease of use.
 int turnSpeed = 3;
 int maxSpeed = 5.0f;
 AsteroidMath::Vector2 direction;

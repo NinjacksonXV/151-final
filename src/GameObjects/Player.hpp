@@ -11,9 +11,10 @@ public:
     void init() override;
 };
 
+// This can potentially move into the player class, unless we want to add some sort of destruction visual later. 
+// Definitions are here temporarily. 
 class PlayerShape : public Object2D
 {
-
 public:
     void init() override
     {
@@ -34,11 +35,18 @@ private:
     };
 };
 
-// TO-DO: Move this into its own class
-
+// TO-DO: Move this into its own header/compilation unit
+/**
+ * @brief This is the current star visual. It's essentially a rectangle that stays in the center of the screen, and takes in the player position to scroll 
+ * the UV of a (relatively) simple star shader. It gives a nice effect, and is cheap to draw. 
+ * 
+ * Later, I'll update the shader so that it's possible to pass in the color palette. 
+ * 
+ */
 class TempStars : public Object2D
 {
 public:
+    // Window size values are hardcoded and should be redone.
     void init() override
     {
         std::cout << "What";
@@ -46,7 +54,7 @@ public:
         if (!shader.loadFromFile("stars.frag", sf::Shader::Fragment))
             std::cout << "Didn't load shader\n";
         shader.setUniform("u_resolution", sf::Vector2f(1920, 1080));
-        setPosition({-(1920 / 2), -(1080 / 2)});
+        setPosition({-(1920 / 2), -(1080 / 2)}); 
 
         renderState.shader = &shader;
     }
@@ -57,6 +65,7 @@ private:
     mutable sf::Shader shader;
     mutable sf::RenderStates renderState;
 
+    // For now, this is a bit silly since it's being moved by the player every frame. I want to rewrite this later. 
     void onDraw(sf::RenderTarget &target, const sf::Transform &transform) const
     {
         shader.setUniform("position", sf::Vector2f(getPosition().x, getPosition().y  * -1.)); // SFML y-axis is inverted

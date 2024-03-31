@@ -5,6 +5,11 @@
 #include <iostream>
 #include <math.h>
 
+/**
+ * @brief Outputs an `sf::Transform` in a 4x4 matrix in the console.  
+ * 
+ * @param transform Transform to display.
+ */
 void displayTransform(sf::Transform transform)
 {
     for (int i = 0; i != 16; i += 4)
@@ -23,6 +28,12 @@ void displayTransform(sf::Transform transform)
     std::cout << '\n';
 }
 
+/**
+ * @brief Returns the provided radians as degrees, which is required for most SFML `rotate()` functions. 
+ * 
+ * @param radians Input radians to be converted to degrees.
+ * @return float Output degrees.
+ */
 float toDegrees(float radians)
 {
     return radians * (180 / M_PI);
