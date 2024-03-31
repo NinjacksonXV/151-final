@@ -3,6 +3,7 @@
 #include <math.h>
 #include "GameObjects/Player.hpp"
 #include "GameObjects/TestObject.hpp"
+#include "Icon.cpp"
 #define M_TAU (M_PI * 2.0f)
 
 sf::RenderTarget const *windowAccessor; // Make this a public static accessor of Game class later
@@ -11,6 +12,7 @@ sf::RenderTarget const *windowAccessor; // Make this a public static accessor of
 int main()
 {
     auto window = sf::RenderWindow{{1920u, 1080u}, "Asteroids", sf::Style::Titlebar | sf::Style::Close}; // This is nice to avoid resizing issues
+    window.setIcon(icon.width, icon.height, icon.pixel_data);
     window.setFramerateLimit(144);
     windowAccessor = &window;
     
@@ -41,12 +43,12 @@ int main()
         }
 
         window.clear();
-        playerView.setCenter(player.getPosition());
         for (GameObject *gameObject : gameObjects)
         {
             gameObject->update(elapsed.asSeconds());
             gameObject->draw(window);
         }
+        playerView.setCenter(player.getPosition());
         window.setView(playerView);
 
         window.display();
