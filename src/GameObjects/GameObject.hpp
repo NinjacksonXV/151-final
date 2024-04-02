@@ -1,10 +1,10 @@
-#include <SFML/Graphics.hpp>
 #pragma once
+#include <SFML/Graphics.hpp>
 
 class GameObject
 {
 public:
-    virtual void init() {}; // may be unnecessary?
+    virtual void init() {}; // may be unnecessary? Putting logic in the constructor may be a better choice
     /**
      * @brief The core update loop..
      *

@@ -49,7 +49,6 @@ public:
     // Window size values are hardcoded and should be redone.
     void init() override
     {
-        std::cout << "What";
         rect = sf::RectangleShape(sf::Vector2f(windowAccessor->getSize().x, windowAccessor->getSize().y));
         if (!shader.loadFromFile("stars.frag", sf::Shader::Fragment))
             std::cout << "Didn't load shader\n";

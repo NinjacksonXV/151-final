@@ -1,3 +1,5 @@
+#version 120
+
 uniform vec2 u_resolution;
 uniform vec2 position;
 
