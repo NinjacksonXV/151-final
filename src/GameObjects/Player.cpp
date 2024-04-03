@@ -20,6 +20,7 @@ void Player::init()
 
 void Player::update(float delta)
 {
+    // std::cout << this->getPosition().x << " " << this->getPosition().y << '\n';
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
     {
         rotate(toDegrees(turnSpeed * delta));
@@ -40,7 +41,7 @@ void Player::update(float delta)
     }
     velocity = velocity.limitLength(maxSpeed);
     move(velocity);
-    children[0]->move(velocity);
+    children[0]->setPosition(this->getPosition());
     for (Object2D *child : children)
     {
         child->update(delta);
