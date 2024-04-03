@@ -19,7 +19,7 @@ class GUI : public GameObject
         virtual void init();
         virtual void update() {};
         virtual void draw();
-    void position(Positions position);
+    void setPosition(Positions horizontalPosition, Positions verticalPosition, float hOffset, float vOffset);
 
     void normalizeScreenSpace(sf::Vector size)
     {
