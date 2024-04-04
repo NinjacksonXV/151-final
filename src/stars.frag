@@ -1,5 +1,3 @@
-#version 120
-
 uniform vec2 u_resolution;
 uniform vec2 position;
 
@@ -32,6 +30,6 @@ void main()
             float size = fract(rand * 345.22);
             col += (m * size);
 }}
-    //if (gv.x > .48 || gv.y > .48) col.r = 1.; //Add red outlines to each box
+    if (gv.x > .48 || gv.y > .48) col.r = 1.; //Add red outlines to each box
     gl_FragColor = vec4(col,1.0);
 }
