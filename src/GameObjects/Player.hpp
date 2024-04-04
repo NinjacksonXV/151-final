@@ -49,11 +49,13 @@ public:
     // Window size values are hardcoded and should be redone.
     void init() override
     {
-        rect = sf::RectangleShape(sf::Vector2f(windowAccessor->getSize().x, windowAccessor->getSize().y));
+        sf::Vector2f winSize(windowAccessor->getSize().x, windowAccessor->getSize().y); 
+        rect = sf::RectangleShape(winSize);
+        std::cout << windowAccessor->getSize().x << ", " << windowAccessor->getSize().y;
         if (!shader.loadFromFile("stars.frag", sf::Shader::Fragment))
             std::cout << "Didn't load shader\n";
-        shader.setUniform("u_resolution", sf::Vector2f(1920, 1080));
-        setPosition({-(1920 / 2), -(1080 / 2)}); 
+        shader.setUniform("u_resolution", winSize);
+        setOrigin({(winSize.x / 2.f), (winSize.y / 2.f)}); 
 
         renderState.shader = &shader;
     }
@@ -67,6 +69,7 @@ private:
     // For now, this is a bit silly since it's being moved by the player every frame. I want to rewrite this later. 
     void onDraw(sf::RenderTarget &target, const sf::Transform &transform) const
     {
+        std::cout << this->getPosition().x << ", " << this->getPosition().y << "\n";
         shader.setUniform("position", sf::Vector2f(getPosition().x, getPosition().y  * -1.)); // SFML y-axis is inverted
         renderState.transform = this->getTransform();
         target.draw(rect, renderState);
