@@ -64,6 +64,11 @@ namespace AsteroidMath
         }
         operator sf::Vector2f *() const
         {
+            // This is to make sure that the X and Y values of sf::Vector2f and Vector2 line up.
+            static_assert(offsetof(sf::Vector2f, x) == offsetof(Vector2, x),
+                          "Field 'x' is misaligned");
+            static_assert(offsetof(sf::Vector2f, y) == offsetof(Vector2, y),
+                          "Field 'y' is misaligned");
             return reinterpret_cast<sf::Vector2f *>(const_cast<Vector2 *>(this));
         }
 
