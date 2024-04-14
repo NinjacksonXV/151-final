@@ -126,5 +126,5 @@ bool AsteroidMath::Vector2::isCurrentLengthValid() const
 
 void AsteroidMath::Vector2::invalidateLength()
 {
-    this->length = 0.0f / 0.0f; // Set to NaN
+    this->length = NAN; // Set to NaN
 }
