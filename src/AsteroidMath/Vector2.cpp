@@ -98,8 +98,9 @@ void AsteroidMath::Vector2::normalize()
 {
     if (this->getLength() != 0)
     {
-        this->setX(this->x / this->getLength());
-        this->setY(this->y / this->getLength());
+        float length = this->getLength();
+        this->setX(this->x / length);
+        this->setY(this->y / length);
     }
 }
 
