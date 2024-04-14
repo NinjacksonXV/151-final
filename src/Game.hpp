@@ -8,6 +8,7 @@ class Game
 public:
     Game();
     void GameLoop();
+    static const sf::RenderWindow* const windowAccessor;
 
 private:
     sf::RenderWindow m_window;
