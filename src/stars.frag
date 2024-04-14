@@ -10,7 +10,7 @@ float Hash21(vec2 p) {
 
 void main()
 {
-    vec2 uv = (gl_FragCoord-.5 * u_resolution.xy)/u_resolution.y; // Normalized pixel coordinates (from 0 to 1)
+    vec2 uv = (gl_FragCoord.xy-.5 * u_resolution.xy)/u_resolution.y; // Normalized pixel coordinates (from 0 to 1)
     uv *= 10.; 
     uv += position * 0.001; // Scroll the UV with player position 
     vec3 col = vec3(0); // Black
@@ -30,6 +30,6 @@ void main()
             float size = fract(rand * 345.22);
             col += (m * size);
 }}
-    if (gv.x > .48 || gv.y > .48) col.r = 1.; //Add red outlines to each box
+    // if (gv.x > .48 || gv.y > .48) col.r = 1.; //Add red outlines to each box
     gl_FragColor = vec4(col,1.0);
 }
