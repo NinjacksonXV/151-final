@@ -39,3 +39,5 @@
 
 # Other (Currently storing assignment files i.e. weekly reports)
 /Other
+
+*.patch
