@@ -1,21 +1,22 @@
 #include "Utilities.hpp"
 
-void displayTransform(sf::Transform transform)
+std::ostream &operator<<(std::ostream &out, const sf::Transform &transform)
 {
     for (int i = 0; i != 16; i += 4)
     {
-        std::cout << '(';
+        out << '(';
         for (int j = 0; j < 4; j++)
         {
-            std::cout << transform.getMatrix()[i + j];
-            if (j == 4)
+            out << transform.getMatrix()[i + j];
+            if (j == 3)
                 break;
             else
-                std::cout << ", ";
+                out << ", ";
         }
-        std::cout << ")\n";
+        out << ")\n";
     }
-    std::cout << '\n';
+    out << '\n';
+    return out;
 }
 
 float toDegrees(float radians)
