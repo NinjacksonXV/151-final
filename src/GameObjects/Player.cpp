@@ -10,10 +10,11 @@ AsteroidMath::Vector2 velocity;
 void Player::init()
 {
     direction = AsteroidMath::Vector2::UP;
-    PlayerShape *playerShape = new PlayerShape();
     TempStars *stars = new TempStars();
+    PlayerShape *playerShape = new PlayerShape();
     children.push_back(stars);
     children.push_back(playerShape);
+    this->shapePtr = playerShape;
     for (Object2D *child : children)
         child->init(); 
 }
