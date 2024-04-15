@@ -4,6 +4,7 @@
 #include "GameObjects/Player.hpp"
 #include "GameObjects/TestObject.hpp"
 #include "Icon.cpp"
+#include "GameObjects/Asteroid.hpp"
 #define M_TAU (M_PI * 2.0f)
 
 sf::RenderTarget const *windowAccessor; // Make this a public static accessor of Game class later
@@ -18,7 +19,20 @@ int main()
     
     Player player;
     TestObject circle({10.0, 10.0});
-    std::vector<GameObject *> gameObjects = {&player, &circle};
+    std::vector<sf::Vector2f> a = {
+            {0.0f, 0.0f},
+            {20.0f, 0.0f},
+            {20.0f, 20.0f}
+        };
+    Asteroid asteroidTest(
+        {
+            {0.0f, 0.0f},
+            {100.0f, 0.0f},
+            {100.0f, 100.0f}
+        }, 
+        sf::Vector2f(100.0f, -100.0f)
+    );
+    std::vector<GameObject *> gameObjects = {&player, &circle, &asteroidTest};
     for (GameObject *gameObject : gameObjects)
     {
         gameObject->init();
@@ -41,16 +55,23 @@ int main()
                 playerView.setSize(event.size.width, event.size.height); // Currently unused since resizing is disabled.
             }
         }
-
+        
         window.clear();
         for (GameObject *gameObject : gameObjects)
         {
             gameObject->update(elapsed.asSeconds());
             gameObject->draw(window);
         }
+
+        // std::cout << asteroidTest.getGlobalBounds();
+
+        if (player.shapePtr->getGlobalBounds().intersects(asteroidTest.getGlobalBounds()))
+        {
+            std::cout << "AABB collision\n";
+        }
+        
         playerView.setCenter(player.getPosition());
         window.setView(playerView);
-
         window.display();
     }
 }
