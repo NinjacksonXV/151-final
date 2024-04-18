@@ -1,11 +1,12 @@
 #pragma once
 #include "GameObject.hpp"
+#include "Button.hpp"
+#include "Display.hpp"
 
 extern sf::RenderTarget const *windowAccessor;
 
 class GUI : public GameObject
 {
-    // static sf::Vector2 
     enum Positions
     {
         RIGHT,
@@ -13,17 +14,15 @@ class GUI : public GameObject
         TOP,
         BOTTOM,
         VERTICAL_CENTER,
-        HORIZ_CENTER,
-    }
-    public:
-        virtual void init();
-        virtual void update() {};
-        virtual void draw();
-    void setPosition(Positions horizontalPosition, Positions verticalPosition, float hOffset, float vOffset);
+        HORIZ_CENTER
+    };
 
-    void normalizeScreenSpace(sf::Vector size)
-    {
+    void addButton(sf::Vector2f position, sf::Text text, sf::Vector2f size);
+    void addText(sf::Vector2f position, sf::Text text);
 
-    }
 
+private:
+    sf::Vector2f mPosition;
+    std::vector<Button> buttons;
+    std::vector<Display> displays;
 };
