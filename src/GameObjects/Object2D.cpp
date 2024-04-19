@@ -3,9 +3,9 @@
 void Object2D::draw(sf::RenderTarget &target) const
 {
 
-    onDraw(target, this->getTransform());
     for (std::size_t i = 0; i < children.size(); ++i)
         children[i]->draw(target, this->getTransform());
+    onDraw(target, this->getTransform());
 }
 
 void Object2D::draw(sf::RenderTarget &target, const sf::Transform &parentTransform) const
@@ -15,11 +15,11 @@ void Object2D::draw(sf::RenderTarget &target, const sf::Transform &parentTransfo
     sf::Transform combinedTransform = parentTransform * getTransform();
 
     // let the object draw itself
-    onDraw(target, combinedTransform);
 
     // draw its children
     for (std::size_t i = 0; i < children.size(); ++i)
         children[i]->draw(target, combinedTransform);
+    onDraw(target, combinedTransform);
 }
 
 void Object2D::update(float delta)
