@@ -11,12 +11,19 @@ sf::Vector2f distanceToScreenEdge;
 
 void Player::init()
 {
+    std::cout << "Initialization occured.";
+    this->setPointCount(4);
+    setPoint(0, {30, -10});
+    setPoint(1, {0, 0});
+    setPoint(2, {-30, -10});
+    setPoint(3, {0, 40});
+    setFillColor(sf::Color::Black);
+    setOutlineColor(sf::Color::White);
+    setOutlineThickness(4.0f);
+
     direction = AsteroidMath::Vector2::UP;
     TempStars *stars = new TempStars();
-    PlayerShape *playerShape = new PlayerShape();
     children.push_back(stars);
-    children.push_back(playerShape);
-    this->shapePtr = playerShape;
     for (Object2D *child : children)
         child->init();
 }
@@ -26,12 +33,12 @@ void Player::update(float delta)
     // std::cout << this->getPosition().x << " " << this->getPosition().y << '\n';
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
     {
-        rotate(toDegrees(turnSpeed * delta));
+        Object2D::rotate(toDegrees(turnSpeed * delta));
         direction.rotate(turnSpeed * delta);
     }
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
     {
-        rotate(toDegrees(turnSpeed * delta * -1));
+        Object2D::rotate(toDegrees(turnSpeed * delta * -1));
         direction.rotate(turnSpeed * delta * -1);
     }
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
@@ -44,34 +51,30 @@ void Player::update(float delta)
     }
 
     distanceToScreenEdge =
-    {
-        this->getPosition().x - windowAccessor->getView().getSize().x / 2.f - shapePtr->getGlobalBounds().width / 2.f,
-        this->getPosition().y - windowAccessor->getView().getSize().y / 2.f - shapePtr->getGlobalBounds().height / 2.f
-    };
+        {
+            this->Object2D::getPosition().x - windowAccessor->getView().getSize().x / 2.f - getGlobalBounds().width / 2.f,
+            this->Object2D::getPosition().y - windowAccessor->getView().getSize().y / 2.f - getGlobalBounds().height / 2.f};
 
     velocity = velocity.limitLength(maxSpeed);
 
-    move(velocity);
+    Object2D::move(velocity);
     // Make this block a member function of GameplayShape
-    if (getPosition().x > windowAccessor->getView().getSize().x / 2.f + shapePtr->getGlobalBounds().width / 2.f
-     || getPosition().x < windowAccessor->getView().getSize().x / -2.0f - shapePtr->getGlobalBounds().width / 2.f)
+    if (Object2D::getPosition().x > windowAccessor->getView().getSize().x / 2.f + getGlobalBounds().width / 2.f || Object2D::getPosition().x < windowAccessor->getView().getSize().x / -2.0f - getGlobalBounds().width / 2.f)
     {
-        setPosition(-1 * sign(this->getPosition().x) * (windowAccessor->getView().getSize().x / 2.f + shapePtr->getGlobalBounds().width / 2.f), getPosition().y);
+        Object2D::setPosition(-1 * sign(this->Object2D::getPosition().x) * (windowAccessor->getView().getSize().x / 2.f + getGlobalBounds().width / 2.f), Object2D::getPosition().y);
     }
-    if (getPosition().y > windowAccessor->getView().getSize().y / 2.0f + shapePtr->getGlobalBounds().height / 2.f
-     || getPosition().y < windowAccessor->getView().getSize().y / -2.0f - shapePtr->getGlobalBounds().height / 2.f)
+    if (Object2D::getPosition().y > windowAccessor->getView().getSize().y / 2.0f + getGlobalBounds().height / 2.f || Object2D::getPosition().y < windowAccessor->getView().getSize().y / -2.0f - getGlobalBounds().height / 2.f)
     {
-        setPosition(getPosition().x, -1 * sign(this->getPosition().y) * (windowAccessor->getView().getSize().y / 2.f + shapePtr->getGlobalBounds().height / 2.f));
+        Object2D::setPosition(Object2D::getPosition().x, -1 * sign(this->Object2D::getPosition().y) * (windowAccessor->getView().getSize().y / 2.f + getGlobalBounds().height / 2.f));
     }
 
-    children[0]->setPosition(this->getPosition());
-    std::cout << getPosition() << '\n';
-    // std::cout << shapePtr->getGlobalBounds().width << ", " << shapePtr->getGlobalBounds().height << '\n';
-    // std::cout << this->shapePtr->getLocalBounds();
+    children[0]->Object2D::setPosition(this->Object2D::getPosition());
+    // std::cout << Object2D::getPosition() << '\n';
+    // std::cout << getGlobalBounds().width << ", " << getGlobalBounds().height << '\n';
+    std::cout << this->getLocalBounds();
     for (Object2D *child : children)
     {
         child->update(delta);
         break;
     }
 }
-

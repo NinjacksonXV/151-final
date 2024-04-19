@@ -1,46 +1,12 @@
 #pragma once
-#include "Object2D.hpp"
+#include "GameplayShape.hpp"
 #include "../Utilities.hpp"
 
 extern sf::RenderTarget const *windowAccessor;
 
-// This can potentially move into the player class, unless we want to add some sort of destruction visual later.
-// Definitions are here temporarily.
-class PlayerShape : public Object2D, public sf::ConvexShape
+class Player : public GameplayShape
 {
 public:
-    void init() override
-    {
-        this->setPointCount(4);
-        setPoint(0, {30, -10});
-        setPoint(1, {0, 0});
-        setPoint(2, {-30, -10});
-        setPoint(3, {0, 40});
-        setFillColor(sf::Color::Black);
-        setOutlineColor(sf::Color::White);
-        setOutlineThickness(4.0f);
-        std::cout << getGlobalBounds() << '\n';
-    }
-    sf::FloatRect getGlobalBounds() const
-    {
-        return this->rect;
-    }
-
-private:
-    mutable sf::FloatRect rect;
-    void onDraw(sf::RenderTarget &target, const sf::Transform &transform) const
-    {
-        rect = transform.transformRect(getLocalBounds());
-        std::cout << getGlobalBounds() << '\n';
-        target.draw(*this, transform);
-    };
-};
-
-class Player : public Object2D
-{
-public:
-    PlayerShape *shapePtr;
-
     void init() override;
 
 private:
