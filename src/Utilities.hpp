@@ -32,3 +32,13 @@ std::ostream &operator<<(std::ostream &out, const sf::Transform &transform);
  * @return float Output degrees.
  */
 float toDegrees(float radians);
+
+/**
+ * @brief Returns the sign of a given numerical.
+ * 
+ * @param val Number to return the sign of
+ * @return int Returns either 1, -1, or zero if the number provided is 0.
+ */
+template <typename T> int sign(T val) {
+    return (T(0) < val) - (val < T(0));
+}
