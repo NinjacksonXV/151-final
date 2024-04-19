@@ -38,6 +38,8 @@ float toDegrees(float radians);
  * 
  * @param val Number to return the sign of
  * @return int Returns either 1, -1, or zero if the number provided is 0.
+ * @author https://stackoverflow.com/a/4609795
+ * 
  */
 template <typename T> int sign(T val) {
     return (T(0) < val) - (val < T(0));
