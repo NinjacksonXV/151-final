@@ -14,11 +14,12 @@ void Object2D::draw(sf::RenderTarget &target, const sf::Transform &parentTransfo
     // combine the parent transform with the Object2D's one
     sf::Transform combinedTransform = parentTransform * getTransform();
 
-    // let the object draw itself
 
     // draw its children
     for (std::size_t i = 0; i < children.size(); ++i)
         children[i]->draw(target, combinedTransform);
+    // let the object draw itself
+    
     onDraw(target, combinedTransform);
 }
 

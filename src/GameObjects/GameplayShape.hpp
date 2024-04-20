@@ -13,9 +13,7 @@ private:
     void onDraw(sf::RenderTarget &target, const sf::Transform &transform) const
     {
         rect = transform.transformRect(getLocalBounds());
-        std::cout << "Drawing\n";
         target.draw(*this, transform);
-        std::cout << "Drew";
     };
 
 protected:
