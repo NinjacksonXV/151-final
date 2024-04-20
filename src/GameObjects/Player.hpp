@@ -4,6 +4,8 @@
 
 extern sf::RenderTarget const *windowAccessor;
 
+class TempStars;
+
 class Player : public GameplayShape
 {
 public:
@@ -11,6 +13,7 @@ public:
 
 private:
     void update(float delta) override;
+    TempStars* stars;
 };
 
 // TO-DO: Move this into its own header/compilation unit
@@ -27,7 +30,7 @@ public:
     // Window size values are hardcoded and should be redone.
     void init() override
     {
-        sf::Vector2f winSize(windowAccessor->getSize().x, windowAccessor->getSize().y);
+        sf::Vector2f winSize(windowAccessor->getView().getSize().x, windowAccessor->getView().getSize().y);
         rect = sf::RectangleShape(winSize);
         // std::cout << windowAccessor->getSize().x << ", " << windowAccessor->getSize().y;
         if (!shader.loadFromFile("stars.frag", sf::Shader::Fragment))
@@ -37,9 +40,14 @@ public:
 
         renderState.shader = &shader;
     }
-
+    void updatePosition(sf::Vector2f delta)
+    {
+        shaderPos += delta;
+    }
 private:
     sf::RectangleShape rect;
+
+    sf::Vector2f shaderPos;
 
     mutable sf::Shader shader;
     mutable sf::RenderStates renderState;
@@ -47,8 +55,7 @@ private:
     // For now, this is a bit silly since it's being moved by the player every frame. I want to rewrite this later.
     void onDraw(sf::RenderTarget &target, const sf::Transform &transform) const
     {
-        // std::cout << this->getPosition().x << ", " << this->getPosition().y << "\n";
-        shader.setUniform("position", sf::Vector2f(getPosition().x, getPosition().y * -1.)); // SFML y-axis is inverted
+        shader.setUniform("position", sf::Vector2f(shaderPos.x, shaderPos.y * -1.f));
         renderState.transform = this->getTransform();
         target.draw(rect, renderState);
     };
