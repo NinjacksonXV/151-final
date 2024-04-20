@@ -23,3 +23,8 @@ float toDegrees(float radians)
 {
     return radians * (180 / M_PI);
 }
+
+sf::Glsl::Vec3 decomposeColor(sf::Color color)
+{
+    return sf::Glsl::Vec3(color.r, color.g, color.b);
+}
