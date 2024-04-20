@@ -3,6 +3,7 @@
 #include "../Utilities.hpp"
 
 extern sf::RenderTarget const *windowAccessor;
+extern sf::View const *gameViewAccessor;
 
 class TempStars;
 
@@ -30,13 +31,14 @@ public:
     // Window size values are hardcoded and should be redone.
     void init() override
     {
-        sf::Vector2f winSize(windowAccessor->getView().getSize().x, windowAccessor->getView().getSize().y);
+        sf::Vector2f winSize(gameViewAccessor->getSize().x, gameViewAccessor->getSize().y);
+        std::cout << winSize << '\n';
         rect = sf::RectangleShape(winSize);
         // std::cout << windowAccessor->getSize().x << ", " << windowAccessor->getSize().y;
         if (!shader.loadFromFile("stars.frag", sf::Shader::Fragment))
             std::cout << "Didn't load shader\n";
         shader.setUniform("u_resolution", winSize);
-        setOrigin({(winSize.x / 2.f), (winSize.y / 2.f)});
+        setOrigin(this->rect.getSize().x / 2.f, this->rect.getSize().x / 2.f);
 
         renderState.shader = &shader;
     }
@@ -52,11 +54,10 @@ private:
     mutable sf::Shader shader;
     mutable sf::RenderStates renderState;
 
-    // For now, this is a bit silly since it's being moved by the player every frame. I want to rewrite this later.
     void onDraw(sf::RenderTarget &target, const sf::Transform &transform) const
     {
+        renderState.transform = this->getTransform(); // Hack because this doesn't inherit from drawable
         shader.setUniform("position", sf::Vector2f(shaderPos.x, shaderPos.y * -1.f));
-        renderState.transform = this->getTransform();
         target.draw(rect, renderState);
     };
 };
