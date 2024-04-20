@@ -8,6 +8,7 @@
 #define M_TAU (M_PI * 2.0f)
 
 sf::RenderTarget const *windowAccessor; // Make this a public static accessor of Game class later
+sf::View const *gameViewAccessor;
 // TO-DO: Move most of this logic to Game class
 int main()
 {
@@ -29,18 +30,17 @@ int main()
         sf::Vector2f(100.0f, -100.0f));
     asteroidTest.Shape::setPosition(0.f, 0.f);
     std::vector<GameObject *> gameObjects = {&player, &circle, &asteroidTest};
+    sf::View gameView({0.f, 0.f}, sf::Vector2f(window.getSize().y, window.getSize().y));
+    gameView.setViewport(sf::FloatRect((static_cast<float>(window.getSize().x) - static_cast<float>(window.getSize().y)) / 2.f / static_cast<float>(window.getSize().x), 0.f,
+                                       (static_cast<float>(window.getSize().y)) / (static_cast<float>(window.getSize().x)),
+                                       1.0f));
+
+    gameViewAccessor = &gameView;
+    sf::Clock clock;
     for (GameObject *gameObject : gameObjects)
     {
         gameObject->init();
     }
-
-    // Note: This block breaks on vertical displays. Could fix by use max() on setViewport function?
-    sf::View gameView({0.f, 0.f}, {static_cast<float>(window.getSize().y), static_cast<float>(window.getSize().y)});
-    gameView.setViewport(sf::FloatRect(.25f, 0.f,
-                                         (static_cast<float>(window.getSize().y)) / (static_cast<float>(window.getSize().x)), 
-                                         1.0f)); 
-
-    sf::Clock clock;
 
     while (window.isOpen())
     {
@@ -53,11 +53,12 @@ int main()
             }
             if (event.type == sf::Event::Resized)
             {
-                gameView.setSize(event.size.width, event.size.height); // Currently unused since resizing is disabled.
+                gameView.setSize(event.size.width, event.size.height); // Currently unused since resizing is disabled. Wouldn't work in current state.
             }
         }
 
         window.clear();
+        window.setView(gameView);
         for (GameObject *gameObject : gameObjects)
         {
             gameObject->update(elapsed.asSeconds());
