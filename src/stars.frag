@@ -12,7 +12,7 @@ void main()
 {
     vec2 uv = (gl_FragCoord.xy-.5 * u_resolution.xy)/u_resolution.y; // Normalized pixel coordinates (from 0 to 1)
     uv *= 10.; 
-    uv += position * 0.001; // Scroll the UV with player position 
+    uv += position * 0.0003; // Scroll the UV with player position 
     vec3 col = vec3(0); // Black
 
     vec2 gv = fract(uv) - .5;
