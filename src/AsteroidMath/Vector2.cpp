@@ -104,6 +104,15 @@ void AsteroidMath::Vector2::normalize()
     }
 }
 
+AsteroidMath::Vector2 AsteroidMath::Vector2::normalized()
+{
+    if (this->getLength() != 0)
+    {
+        return {this->x / length, this->y / length};
+    }
+    else return *this;
+}
+
 void AsteroidMath::Vector2::updateLength()
 {
     length = sqrt(pow(this->x, 2) + pow(this->y, 2));
