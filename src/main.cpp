@@ -47,6 +47,7 @@ int main()
         sf::Vector2f(100.0f, -100.0f));
     asteroidTest.Shape::setPosition(0.f, 0.f);
     std::vector<GameObject *> gameObjects = {&player, &circle, &asteroidTest};
+
     sf::View gameView({0.f, 0.f}, sf::Vector2f(window.getSize().y, window.getSize().y));
     gameView.setViewport(sf::FloatRect((static_cast<float>(window.getSize().x) - static_cast<float>(window.getSize().y)) / 2.f / static_cast<float>(window.getSize().x), 0.f,
                                        (static_cast<float>(window.getSize().y)) / (static_cast<float>(window.getSize().x)),
@@ -64,6 +65,19 @@ int main()
     colorShader.setUniform("primary", sf::Glsl::Vec4(sf::Color::Black)); 
     colorShader.setUniform("secondary", sf::Glsl::Vec4(sf::Color::White));
 
+
+    sf::Texture door1Texture;
+    door1Texture.loadFromFile("../../asset-source/door1.png");
+    sf::Sprite door1_l(door1Texture), door1_r(door1Texture);
+    door1_l.setScale(gameView.getSize().x / door1Texture.getSize().x, gameView.getSize().y / door1Texture.getSize().y);
+    door1_r.setScale(gameView.getSize().x / door1Texture.getSize().x * -1.f, gameView.getSize().y / door1Texture.getSize().y);
+
+    door1_l.setOrigin(door1Texture.getSize().x, 0.0f);
+    door1_r.setOrigin(door1Texture.getSize().x, 0.0f);
+
+    // door1_l.setPosition((window.getSize().x - gameView.getSize().x) / 2.0f, 0.0);
+    door1_l.setPosition(window.getSize().x / 2.0f - gameView.getSize().x / 2.0f, 0.0f);
+    door1_r.setPosition((window.getSize().x - gameView.getSize().x) / 2.0f + gameView.getSize().x, 0.0f);
 
     for (GameObject *gameObject : gameObjects)
     {
@@ -92,14 +106,16 @@ int main()
             gameObject->update(elapsed.asSeconds());
             gameObject->draw(window);
         }
-
+        door1_r.move(elapsed.asSeconds() * 3.f, 0.0f);
+        window.setView(window.getDefaultView());
+        window.draw(door1_l, &colorShader);
+        window.draw(door1_r, &colorShader);
         // std::cout << asteroidTest.getGlobalBounds();
 
-        if (player.getGlobalBounds().intersects(asteroidTest.getGlobalBounds()))
-        {
-            std::cout << "AABB collision\n";
-        }
-        window.setView(gameView);
+        // if (player.getGlobalBounds().intersects(asteroidTest.getGlobalBounds()))
+        // {
+        //     std::cout << "AABB collision\n";
+        // }
         window.display();
     }
 }
