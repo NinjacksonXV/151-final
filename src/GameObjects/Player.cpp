@@ -2,11 +2,19 @@
 #include "../Utilities.hpp"
 #include <math.h>
 
+#define $ 
+
 // Script variables are here for ease of use.
-int turnSpeed = 3;
-int maxSpeed = 5.0f;
+float acceleration = 3.f;
+float turnSpeed = 3.f;
+float maxSpeed = 4.f;
+
+float turnAroundSpeedBoostThreshold = -.7f;
+float turnAroundSpeedBoost = 2.f;
+
 AsteroidMath::Vector2 direction;
 AsteroidMath::Vector2 velocity;
+
 sf::Vector2f distanceToScreenEdge;
 
 void Player::init()
@@ -23,6 +31,7 @@ void Player::init()
 
     direction = AsteroidMath::Vector2::UP;
     TempStars *stars = new TempStars();
+    this->stars = stars;
     children.push_back(stars);
     for (Object2D *child : children)
         child->init();
@@ -30,7 +39,6 @@ void Player::init()
 
 void Player::update(float delta)
 {
-    // std::cout << this->getPosition().x << " " << this->getPosition().y << '\n';
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
     {
         Object2D::rotate(toDegrees(turnSpeed * delta));
@@ -43,13 +51,16 @@ void Player::update(float delta)
     }
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
     {
-        velocity += direction * delta * 10.0f;
+        velocity += direction 
+        * delta 
+        * acceleration
+        * (velocity.normalized().dotProduct(direction) < turnAroundSpeedBoostThreshold ? turnAroundSpeedBoost : 1.f);
+        // std::cout << velocity.normalized().dotProduct(direction) << '\n';
     }
     else
     {
         velocity -= velocity * delta;
     }
-
     distanceToScreenEdge =
         {
             this->Object2D::getPosition().x - windowAccessor->getView().getSize().x / 2.f - getGlobalBounds().width / 2.f,
@@ -58,6 +69,8 @@ void Player::update(float delta)
     velocity = velocity.limitLength(maxSpeed);
 
     Object2D::move(velocity);
+    stars->updatePosition(velocity);
+
     // Make this block a member function of GameplayShape
     if (Object2D::getPosition().x > windowAccessor->getView().getSize().x / 2.f + getGlobalBounds().width / 2.f || Object2D::getPosition().x < windowAccessor->getView().getSize().x / -2.0f - getGlobalBounds().width / 2.f)
     {
@@ -68,10 +81,6 @@ void Player::update(float delta)
         Object2D::setPosition(Object2D::getPosition().x, -1 * sign(this->Object2D::getPosition().y) * (windowAccessor->getView().getSize().y / 2.f + getGlobalBounds().height / 2.f));
     }
 
-    children[0]->Object2D::setPosition(this->Object2D::getPosition());
-    // std::cout << Object2D::getPosition() << '\n';
-    // std::cout << getGlobalBounds().width << ", " << getGlobalBounds().height << '\n';
-    std::cout << this->getLocalBounds();
     for (Object2D *child : children)
     {
         child->update(delta);
