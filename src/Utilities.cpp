@@ -19,6 +19,12 @@ std::ostream &operator<<(std::ostream &out, const sf::Transform &transform)
     return out;
 }
 
+std::ostream &operator<<(std::ostream &out, const sf::Color &color)
+{
+    out << '(' << color.r << ", " << color.g << ", " << color.b << ')'; 
+    return out;
+}
+
 float toDegrees(float radians)
 {
     return radians * (180 / M_PI);
