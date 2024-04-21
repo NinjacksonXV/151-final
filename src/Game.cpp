@@ -1,5 +1,7 @@
 #include "Game.hpp"
 
+ColorPalette Game::currentPalette = ColorPalette::basic;
+
 void Game::GameLoop()
 {
     sf::Clock clock;
