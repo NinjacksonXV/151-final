@@ -11,7 +11,7 @@ class Player : public GameplayShape
 {
 public:
     void init() override;
-
+    void setColorPalette(ColorPalette colorPalette) override;
 private:
     void update(float delta) override;
     TempStars* stars;
@@ -25,7 +25,7 @@ private:
  * Later, I'll update the shader so that it's possible to pass in the color palette.
  *
  */
-class TempStars : public Object2D
+class TempStars : public Object2D, public Colorable
 {
 public:
     // Window size values are hardcoded and should be redone.
@@ -37,10 +37,20 @@ public:
         // std::cout << windowAccessor->getSize().x << ", " << windowAccessor->getSize().y;
         if (!shader.loadFromFile("stars.frag", sf::Shader::Fragment))
             std::cout << "Didn't load shader\n";
+
+        
+        setColorPalette(Game::getColorPalette());
+
         shader.setUniform("u_resolution", winSize);
+        
         setOrigin(this->rect.getSize().x / 2.f, this->rect.getSize().x / 2.f);
 
         renderState.shader = &shader;
+    }
+    void setColorPalette(ColorPalette colorPalette) override
+    {
+        shader.setUniform("backgroundCol", sf::Glsl::Vec4(colorPalette.primary));
+        shader.setUniform("starCol", sf::Glsl::Vec4(colorPalette.tertiary));
     }
     void updatePosition(sf::Vector2f delta)
     {
