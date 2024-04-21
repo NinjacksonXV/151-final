@@ -32,7 +32,6 @@ public:
     void init() override
     {
         sf::Vector2f winSize(gameViewAccessor->getSize().x, gameViewAccessor->getSize().y);
-        std::cout << winSize << '\n';
         rect = sf::RectangleShape(winSize);
         // std::cout << windowAccessor->getSize().x << ", " << windowAccessor->getSize().y;
         if (!shader.loadFromFile("stars.frag", sf::Shader::Fragment))
