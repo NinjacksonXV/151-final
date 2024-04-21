@@ -19,14 +19,14 @@ sf::Vector2f distanceToScreenEdge;
 
 void Player::init()
 {
-    std::cout << "Initialization occured.";
     this->setPointCount(4);
-    setPoint(0, {30, -10});
+    setPoint(0, {30, 10});
     setPoint(1, {0, 0});
-    setPoint(2, {-30, -10});
-    setPoint(3, {0, 40});
-    setFillColor(sf::Color::Black);
-    setOutlineColor(sf::Color::White);
+    setPoint(2, {-30, 10});
+    setPoint(3, {0, -40});
+    Object2D::setOrigin({0, -5});
+    setFillColor(Game::getColorPalette().primary);
+    setOutlineColor(Game::getColorPalette().secondary);
     setOutlineThickness(4.0f);
 
     direction = AsteroidMath::Vector2::UP;
