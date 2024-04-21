@@ -14,6 +14,7 @@ file(GLOB_RECURSE SOURCES "src/*.cpp")
 
 add_executable(CMakeSFMLProject ${SOURCES})
 target_link_libraries(CMakeSFMLProject PRIVATE sfml-graphics)
+target_link_libraries(CMakeSFMLProject PRIVATE sfml-audio)
 target_compile_features(CMakeSFMLProject PRIVATE cxx_std_20)
 
 if(WIN32)
