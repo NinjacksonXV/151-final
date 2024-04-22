@@ -1,7 +1,7 @@
 #include "Vector2.hpp"
 
-const AsteroidMath::Vector2 AsteroidMath::Vector2::UP = AsteroidMath::Vector2(0, 1);
-const AsteroidMath::Vector2 AsteroidMath::Vector2::DOWN = AsteroidMath::Vector2(0, -1);
+const AsteroidMath::Vector2 AsteroidMath::Vector2::UP = AsteroidMath::Vector2(0, -1);
+const AsteroidMath::Vector2 AsteroidMath::Vector2::DOWN = AsteroidMath::Vector2(0, 1);
 const AsteroidMath::Vector2 AsteroidMath::Vector2::LEFT = AsteroidMath::Vector2(-1, 0);
 const AsteroidMath::Vector2 AsteroidMath::Vector2::RIGHT = AsteroidMath::Vector2(1, 0);
 const AsteroidMath::Vector2 AsteroidMath::Vector2::ZERO = AsteroidMath::Vector2(0, 0);
@@ -102,6 +102,15 @@ void AsteroidMath::Vector2::normalize()
         this->setX(this->x / length);
         this->setY(this->y / length);
     }
+}
+
+AsteroidMath::Vector2 AsteroidMath::Vector2::normalized()
+{
+    if (this->getLength() != 0)
+    {
+        return {this->x / length, this->y / length};
+    }
+    else return *this;
 }
 
 void AsteroidMath::Vector2::updateLength()

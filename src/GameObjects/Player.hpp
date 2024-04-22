@@ -1,50 +1,20 @@
 #pragma once
-#include "Object2D.hpp"
+#include "GameplayShape.hpp"
 #include "../Utilities.hpp"
 
 extern sf::RenderTarget const *windowAccessor;
+extern sf::View const *gameViewAccessor;
 
-// This can potentially move into the player class, unless we want to add some sort of destruction visual later.
-// Definitions are here temporarily.
-class PlayerShape : public Object2D, public sf::ConvexShape
+class TempStars;
+
+class Player : public GameplayShape
 {
 public:
-    void init() override
-    {
-        this->setPointCount(4);
-        setPoint(0, {30, -10});
-        setPoint(1, {0, 0});
-        setPoint(2, {-30, -10});
-        setPoint(3, {0, 40});
-        setFillColor(sf::Color::Black);
-        setOutlineColor(sf::Color::White);
-        setOutlineThickness(4.0f);
-        std::cout << getGlobalBounds() << '\n';
-    }
-    sf::FloatRect getGlobalBounds() const
-    {
-        return this->rect;
-    }
-
-private:
-    mutable sf::FloatRect rect;
-    void onDraw(sf::RenderTarget &target, const sf::Transform &transform) const
-    {
-        rect = transform.transformRect(getLocalBounds());
-        std::cout << getGlobalBounds() << '\n';
-        target.draw(*this, transform);
-    };
-};
-
-class Player : public Object2D
-{
-public:
-    PlayerShape *shapePtr;
-
     void init() override;
-
+    void setColorPalette(ColorPalette colorPalette) override;
 private:
     void update(float delta) override;
+    TempStars* stars;
 };
 
 // TO-DO: Move this into its own header/compilation unit
@@ -55,35 +25,48 @@ private:
  * Later, I'll update the shader so that it's possible to pass in the color palette.
  *
  */
-class TempStars : public Object2D
+class TempStars : public Object2D, public Colorable
 {
 public:
     // Window size values are hardcoded and should be redone.
     void init() override
     {
-        sf::Vector2f winSize(windowAccessor->getSize().x, windowAccessor->getSize().y);
+        sf::Vector2f winSize(gameViewAccessor->getSize().x, gameViewAccessor->getSize().y);
         rect = sf::RectangleShape(winSize);
         // std::cout << windowAccessor->getSize().x << ", " << windowAccessor->getSize().y;
         if (!shader.loadFromFile("stars.frag", sf::Shader::Fragment))
             std::cout << "Didn't load shader\n";
+
+        
+        setColorPalette(Game::getColorPalette());
+
         shader.setUniform("u_resolution", winSize);
-        setOrigin({(winSize.x / 2.f), (winSize.y / 2.f)});
+        
+        setOrigin(this->rect.getSize().x / 2.f, this->rect.getSize().x / 2.f);
 
         renderState.shader = &shader;
     }
-
+    void setColorPalette(ColorPalette colorPalette) override
+    {
+        shader.setUniform("backgroundCol", sf::Glsl::Vec4(colorPalette.primary));
+        shader.setUniform("starCol", sf::Glsl::Vec4(colorPalette.tertiary));
+    }
+    void updatePosition(sf::Vector2f delta)
+    {
+        shaderPos += delta;
+    }
 private:
     sf::RectangleShape rect;
+
+    sf::Vector2f shaderPos;
 
     mutable sf::Shader shader;
     mutable sf::RenderStates renderState;
 
-    // For now, this is a bit silly since it's being moved by the player every frame. I want to rewrite this later.
     void onDraw(sf::RenderTarget &target, const sf::Transform &transform) const
     {
-        // std::cout << this->getPosition().x << ", " << this->getPosition().y << "\n";
-        shader.setUniform("position", sf::Vector2f(getPosition().x, getPosition().y * -1.)); // SFML y-axis is inverted
-        renderState.transform = this->getTransform();
+        renderState.transform = this->getTransform(); // Hack because this doesn't inherit from drawable
+        shader.setUniform("position", sf::Vector2f(shaderPos.x, shaderPos.y * -1.f));
         target.draw(rect, renderState);
     };
 };

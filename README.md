@@ -2,7 +2,13 @@
 Project for CS-151 final at North Idaho College, written in C++ and using [SFML](https://www.sfml-dev.org/). 
 
 ## Build Instructions
-Use CMake to first pull SFML and build it locally; this will generate the needed makefile for the project itself, which you can then build. It is recommended to use the [VSCode CMake-Tools](https://code.visualstudio.com/docs/cpp/cmake-linux) extension if you are unfamiliar with using CMake from the command line. 
+If you are building on Windows and using G++ via MSYS2, it is recommended to install SFML via the MSYS2 UCRT terminal with the following command:
+
+```bash
+pacman -S mingw-w64-ucrt-x86_64-flac
+``` 
+
+From there, update the CMakeLists.txt file with the path to the OpenAL dll, e.g. `C:/msys64/ucrt64/bin/libopenal-1.dll` (note that this appears as OPENAL_PATH in the CMake cache for easy editing).
 
 > [!IMPORTANT] 
 > Currently, it's required to manually move any shaders (i.e. stars.frag) to `build/bin`. While this can be automated with CMake down the line, it makes editing shaders awkward; since the shaders are loaded at runtime, it's possible to modify the shaders without rebuilding the project, which is very quick. 
