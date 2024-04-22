@@ -10,7 +10,7 @@ class MusicHandler
 public:
     MusicHandler(sf::InputSoundFile &starter);
 
-    void queueUp(sf::InputSoundFile &track);
+    void queueUp(std::string &filename);
     void stopAll();
 
     void loopStarted();

@@ -15,6 +15,8 @@
 sf::RenderTarget const *windowAccessor; // Make this a public static accessor of Game class later
 sf::View const *gameViewAccessor;
 
+sf::Font font;
+
 const std::string colorShaderStr =
     "uniform sampler2D texture;"
     "uniform vec4 primary;"
@@ -70,6 +72,28 @@ int main()
 
     door1_l.setPosition(window.getSize().x / 2.0f - gameView.getSize().x / 2.0f, 0.0f);
     door1_r.setPosition((window.getSize().x - gameView.getSize().x) / 2.0f + gameView.getSize().x, 0.0f);
+
+    sf::InputSoundFile musicFile;
+    musicFile.openFromFile("../../asset-source/music/bass3.wav");
+    sf::InputSoundFile musicFile2;
+    musicFile2.openFromFile("../../asset-source/music/drums.wav");
+
+    sf::Music test1;
+    test1.openFromFile("../../asset-source/music/bass3.wav");
+    sf::Music test2;
+    test2.openFromFile("../../asset-source/music/drums.wav");
+
+    test1.setLoop(true);
+    test2.setLoop(true);
+
+    test1.play();
+
+    sf::Sound soundTest;
+    sf::SoundBuffer soundTestBuffer;
+    soundTestBuffer.loadFromFile("../../asset-source/music/drums.wav");
+    soundTest.setBuffer(soundTestBuffer);
+
+    soundTest.play();
 
     for (GameObject *gameObject : gameObjects)
     {
