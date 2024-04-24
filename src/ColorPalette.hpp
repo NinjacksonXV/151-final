@@ -14,4 +14,5 @@ struct ColorPalette
     static const ColorPalette coldlight;
     static const ColorPalette candy;
     static const ColorPalette rust;
+    static const ColorPalette mushroom;
 };
