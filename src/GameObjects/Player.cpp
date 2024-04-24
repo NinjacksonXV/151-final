@@ -24,10 +24,11 @@ sf::Vector2f distanceToScreenEdge;
 void Player::init()
 {
     this->setPointCount(4);
-    setPoint(0, {30, 10});
-    setPoint(1, {0, 0});
-    setPoint(2, {-30, 10});
-    setPoint(3, {0, -40});
+    // When detecting collision, you need to transform these points by the player transform. Put this logic in GameplayShape
+    setPoint(0, {-30, 10});
+    setPoint(1, {0, -40});
+    setPoint(2, {30, 10});
+    setPoint(3, {0, 0});
     Object2D::setOrigin({0, -5});
     setFillColor(Game::getColorPalette().primary);
     setOutlineColor(Game::getColorPalette().secondary);
