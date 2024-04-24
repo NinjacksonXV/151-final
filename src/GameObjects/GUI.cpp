@@ -12,6 +12,17 @@ void GUI::addText(std::string s, sf::Vector2f position, unsigned size, sf::Color
     texts.push_back(text);
 }
 
+void GUI::changeText(std::string newString, int index)
+{
+    texts[index]->setText(newString);
+}
+
+void GUI::changeText(int newNumber, int index)
+{
+    std::string newString = std::to_string(newNumber);
+    texts[index]->setText(newString);
+}
+
 void GUI::update(sf::Event &e, sf::RenderWindow &window)
 {
     for(std::size_t i = 0; i < buttons.size(); i++)
