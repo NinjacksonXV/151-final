@@ -1,3 +1,5 @@
+#pragma once
+#include "Game.hpp"
 #include "ColorPalette.hpp"
 
 /**
@@ -7,5 +9,5 @@
 class Colorable
 {
 public:
-    virtual void setColorPalette(ColorPalette colorPalette) = 0;
+    virtual void setColorPalette(const ColorPalette &colorPalette) = 0;
 };

@@ -17,7 +17,7 @@ void main()
     uv *= 10.; 
     uv += position * 0.0003; // Scroll the UV with player position 
     vec3 col = backgroundCol.rgb; // Black
-
+    float alpha = 0.;
     vec2 gv = fract(uv) - .5;
     vec2 id = floor(uv); // I'm not sure how, but this splits the UV into several smaller UVs
 
@@ -31,8 +31,8 @@ void main()
             float m = .02/d;
             m *= smoothstep(.3, .01, d); //This is what allows stars to render inside other GVs, I think.
             float size = fract(rand * 345.22);
-            col += (m * size) * starCol;
+            alpha += (m * size);
 }}
     // if (gv.x > .48 || gv.y > .48) col.r = 1.; //Add red outlines to each box
-    gl_FragColor = vec4(col,1.0);
+    gl_FragColor = vec4(starCol,alpha);
 }

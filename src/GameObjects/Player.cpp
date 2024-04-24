@@ -41,10 +41,11 @@ void Player::init()
         child->init();
 }
 
-void Player::setColorPalette(ColorPalette colorPalette)
+void Player::setColorPalette(const ColorPalette &colorPalette)
 {
     this->setFillColor(colorPalette.primary);
     this->setOutlineColor(colorPalette.secondary);
+    stars->setColorPalette(colorPalette);
 }
 
 void Player::update(float delta)

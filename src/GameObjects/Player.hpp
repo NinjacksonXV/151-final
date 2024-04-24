@@ -11,7 +11,7 @@ class Player : public GameplayShape
 {
 public:
     void init() override;
-    void setColorPalette(ColorPalette colorPalette) override;
+    void setColorPalette(const ColorPalette &colorPalette);
 private:
     void update(float delta) override;
     TempStars* stars;
@@ -28,11 +28,10 @@ private:
 class TempStars : public Object2D, public Colorable
 {
 public:
-    // Window size values are hardcoded and should be redone.
     void init() override
     {
         sf::Vector2f winSize(gameViewAccessor->getSize().x, gameViewAccessor->getSize().y);
-        rect = sf::RectangleShape(winSize);
+        backgroundRect= sf::RectangleShape(winSize), starRect = sf::RectangleShape(winSize);
         // std::cout << windowAccessor->getSize().x << ", " << windowAccessor->getSize().y;
         if (!shader.loadFromFile("stars.frag", sf::Shader::Fragment))
             std::cout << "Didn't load shader\n";
@@ -42,12 +41,15 @@ public:
 
         shader.setUniform("u_resolution", winSize);
         
-        setOrigin(this->rect.getSize().x / 2.f, this->rect.getSize().x / 2.f);
-
+        this->setOrigin(this->starRect.getSize().x / 2.f, this->starRect.getSize().x / 2.f);
+        // starRect.setOrigin(this->starRect.getSize().x / 2.f, this->starRect.getSize().x / 2.f);
+        // backgroundRect.setOrigin(this->starRect.getSize().x / 2.f, this->starRect.getSize().x / 2.f);
         renderState.shader = &shader;
+        // renderState.blendMode = sf::BlendAlpha;
     }
-    void setColorPalette(ColorPalette colorPalette) override
+    void setColorPalette(const ColorPalette &colorPalette) override
     {
+        backgroundRect.setFillColor(colorPalette.primary);
         shader.setUniform("backgroundCol", sf::Glsl::Vec4(colorPalette.primary));
         shader.setUniform("starCol", sf::Glsl::Vec4(colorPalette.tertiary));
     }
@@ -56,7 +58,8 @@ public:
         shaderPos += delta;
     }
 private:
-    sf::RectangleShape rect;
+    sf::RectangleShape starRect;
+    mutable sf::RectangleShape backgroundRect;
 
     sf::Vector2f shaderPos;
 
@@ -67,6 +70,7 @@ private:
     {
         renderState.transform = this->getTransform(); // Hack because this doesn't inherit from drawable
         shader.setUniform("position", sf::Vector2f(shaderPos.x, shaderPos.y * -1.f));
-        target.draw(rect, renderState);
+        target.draw(backgroundRect, this->getTransform());
+        target.draw(starRect, renderState);
     };
 };
