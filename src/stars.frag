@@ -34,5 +34,5 @@ void main()
             alpha += (m * size);
 }}
     // if (gv.x > .48 || gv.y > .48) col.r = 1.; //Add red outlines to each box
-    gl_FragColor = vec4(starCol,alpha);
+    gl_FragColor = vec4(starCol.rgb,alpha);
 }
