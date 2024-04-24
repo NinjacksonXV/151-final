@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 project(CMakeSFMLProject LANGUAGES CXX)
 
-set(OPENAL_PATH "C:/msys64/ucrt64/bin/libopenal-1.dll" CACHE PATH "Path to OpenAL directory")
+set(OPENAL_PATH "C:/Development/Tools/ucrt64/bin/libopenal-1.dll" CACHE PATH "Path to OpenAL directory")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
 
@@ -16,7 +16,7 @@ if(WIN32)
     add_custom_command(
         TARGET CMakeSFMLProject
         COMMENT "Copy OpenAL DLL"
-        PRE_BUILD COMMAND ${CMAKE_COMMAND} -E copy "C:/msys64/ucrt64/bin/libopenal-1.dll" $<TARGET_FILE_DIR:CMakeSFMLProject>
+        PRE_BUILD COMMAND ${CMAKE_COMMAND} -E copy "C:/Development/Tools/ucrt64/bin/libopenal-1.dll" $<TARGET_FILE_DIR:CMakeSFMLProject>
         VERBATIM)
 endif()
 

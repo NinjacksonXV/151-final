@@ -5,6 +5,7 @@
 #include "GameObjects/TestObject.hpp"
 #include "Icon.cpp"
 #include "GameObjects/Asteroid.hpp"
+#include "GUI.hpp"
 #define M_TAU (M_PI * 2.0f)
 
 sf::RenderTarget const *windowAccessor; // Make this a public static accessor of Game class later
@@ -78,6 +79,8 @@ int main()
     // door1_l.setPosition((window.getSize().x - gameView.getSize().x) / 2.0f, 0.0);
     door1_l.setPosition(window.getSize().x / 2.0f - gameView.getSize().x / 2.0f, 0.0f);
     door1_r.setPosition((window.getSize().x - gameView.getSize().x) / 2.0f + gameView.getSize().x, 0.0f);
+
+
 
     for (GameObject *gameObject : gameObjects)
     {

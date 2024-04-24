@@ -1,28 +1,31 @@
-#pragma once
-#include "GameObject.hpp"
+#ifndef GUI_HPP
+#define GUI_HPP
+
+#include <SFML/Graphics.hpp>
+#include <vector>
+#include <string>
 #include "Button.hpp"
-#include "Display.hpp"
+#include "GameObject.hpp"
+#include "Text.hpp"
 
-extern sf::RenderTarget const *windowAccessor;
 
-class GUI : public GameObject
+class GUI : public sf::Drawable
 {
-    enum Positions
-    {
-        RIGHT,
-        LEFT,
-        TOP,
-        BOTTOM,
-        VERTICAL_CENTER,
-        HORIZ_CENTER
-    };
+public:
+    void addButton(std::string s, sf::Vector2f position, sf::Vector2f size);
+    void removeAllButtons(){buttons.clear();};
+    void addText(std::string s, sf::Vector2f position, unsigned size, sf::Color fillColor);
+    void removeAllTexts(){texts.clear();};
 
-    void addButton(sf::Vector2f position, sf::Text text, sf::Vector2f size);
-    void addText(sf::Vector2f position, sf::Text text);
-
-
+    virtual void update(sf::Event &e, sf::RenderWindow &window);
+    virtual void draw(sf::RenderTarget &target, sf::RenderStates states) const;
 private:
-    sf::Vector2f mPosition;
-    std::vector<Button> buttons;
-    std::vector<Display> displays;
+    sf::RenderWindow window;
+    int selection;
+    sf::Font mFont;
+    sf::Text mText;
+    std::vector<Button*> buttons;
+    std::vector<Text*> texts;
 };
+
+#endif

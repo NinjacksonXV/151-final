@@ -1,60 +1,45 @@
-/**
- * @file Button.hpp
- * @author Jacob McKenzie
- * @brief  Button header file
- * @version 0.1
- * @date 2024-04-08
- * 
- * @copyright Copyright (c) 2024
- * 
- */
-
-#pragma once
+#ifndef BUTTON_HPP
+#define BUTTON_HPP
 
 #include <SFML/Graphics.hpp>
 #include <string>
 #include <iostream>
-#include "GameObject.hpp"
 
-enum state
-{
-    NORMAL,
-    HOVERED,
-    CLICKED
-};
-
-class Button : public GameObject
+class Button : public sf::Drawable
 {
 public:
-    Button(std::string s, sf::Vector2f position);
-    ~Button();
+    Button(std::string s, sf::Vector2f position, sf::Vector2f size);
+    ~Button(){};
+    
     void setPosition(sf::Vector2f position);
-    sf::Vector2f getPosition();
     void setSize(sf::Vector2f size);
+    void setColor(sf::Color btnColor);
     void setText(std::string s);
-    void setColorTextNormal(sf::Color textNormalColor){mTextNormal = textNormalColor;};
+    void setColorText(sf::Color textNormalColor){mTextNormal = textNormalColor;};
     void setColorTextHover(sf::Color textHoverColor){mTextHover = textHoverColor;};
-    void update(sf::Event &e, sf::RenderWindow &window);
-    virtual void onDraw(sf::RenderTarget& target, const sf::Transform &transform) const;
+    void setOutlineColor(sf::Color color, unsigned thickness);
+
+    sf::Vector2f getPosition(){return mPosition;};
+    sf::Vector2f getDimensions(){return sf::Vector2f(mButton.getGlobalBounds().width, mButton.getGlobalBounds().height);};
+
+    virtual void update(sf::Event &e, sf::RenderWindow &window);
+    virtual void draw(sf::RenderTarget &target, sf::RenderStates states) const;
 
 private:
-
-    void setPosition(sf::Vertex lines[], sf::Vector2f position);
-    
-    
-    sf::Vector2f mSize;
-
-    //Button
-    sf::Vertex lines[5];
+    sf::RectangleShape mButton;
+    sf::Color mButtonColor;
     sf::Vector2f mPosition;
+    
+    bool isSelected;
+    sf::CircleShape mTriangle;
 
-    //Text 
     sf::Text mText;
     sf::Font mFont;
     sf::Color mTextNormal = sf::Color::White;
-    sf::Color mTextHover = sf::Color(220, 220, 220);
-
-    
+    sf::Color mTextHover = sf::Color::Red;
+    //sf::Color mTextClicked;
 
 };
 
+
+#endif
