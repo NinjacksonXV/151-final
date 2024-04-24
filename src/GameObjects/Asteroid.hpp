@@ -21,4 +21,5 @@ private:
         rect = transform.transformRect(getLocalBounds());
         target.draw(*this, transform);
     };
+    sf::Vector2f calculateCentroid();
 };
