@@ -21,6 +21,11 @@ AsteroidMath::Vector2 velocity;
 
 sf::Vector2f distanceToScreenEdge;
 
+Player::Player()
+{
+    this->collisionLayer = C_Player | C_Asteroid;
+}
+
 void Player::init()
 {
     this->setPointCount(4);
