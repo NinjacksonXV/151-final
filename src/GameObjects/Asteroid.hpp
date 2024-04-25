@@ -4,7 +4,6 @@
 class Asteroid : public Object2D, public sf::ConvexShape
 {
 public:
-    Asteroid();
     Asteroid(std::vector<sf::Vector2f> points, sf::Vector2f position);
     std::vector<sf::Vector2f> getNormals() {return normals;}
     sf::FloatRect getGlobalBounds()
@@ -12,6 +11,7 @@ public:
         return rect;
     }
 private:
+    void split();
     mutable sf::FloatRect rect;
     std::vector<sf::Vector2f> normals;
     void update(float delta) override;

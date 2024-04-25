@@ -1,6 +1,13 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 
+enum Flags
+{
+    Drawable = 0x01,
+    
+
+};
+
 class GameObject
 {
 public:
@@ -17,6 +24,7 @@ public:
      * @param target Render target to draw to, i.e. a window or a texture.
      */
     virtual void draw(sf::RenderTarget &target) const = 0;
+    short int flags;  
 
 private:
     sf::RenderTarget *renderTarget; // Currently unused

@@ -8,7 +8,7 @@
 class Button : public sf::Drawable
 {
 public:
-    Button(std::string s, sf::Vector2f position, sf::Vector2f size);
+    Button(std::string s, sf::Vector2f position, unsigned int fontSize = 40);
     ~Button(){};
     
     void setPosition(sf::Vector2f position);
@@ -18,6 +18,7 @@ public:
     void setColorText(sf::Color textNormalColor){mTextNormal = textNormalColor;};
     void setColorTextHover(sf::Color textHoverColor){mTextHover = textHoverColor;};
     void setOutlineColor(sf::Color color, unsigned thickness);
+    bool onClick(){return isClicked;};
 
     sf::Vector2f getPosition(){return mPosition;};
     sf::Vector2f getDimensions(){return sf::Vector2f(mButton.getGlobalBounds().width, mButton.getGlobalBounds().height);};
@@ -30,6 +31,7 @@ private:
     sf::Color mButtonColor;
     sf::Vector2f mPosition;
     
+    bool isClicked = false;
     bool isSelected;
     sf::CircleShape mTriangle;
 

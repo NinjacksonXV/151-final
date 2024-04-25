@@ -9,13 +9,10 @@
 #include "GameObjects/TestObject.hpp"
 #include "Icon.cpp"
 #include "GameObjects/Asteroid.hpp"
-<<<<<<< HEAD
-#include "GUI.hpp"
-#define M_TAU (M_PI * 2.0f)
-=======
 
 // #include "MusicHandler.hpp"
->>>>>>> origin/ninjacksonxv
+
+// #include "MusicHandler.hpp"
 
 sf::RenderTarget const *windowAccessor; // Make this a public static accessor of Game class later
 sf::View const *gameViewAccessor;

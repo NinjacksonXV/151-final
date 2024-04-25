@@ -10,14 +10,20 @@ class TempStars;
 class Player : public GameplayShape
 {
 public:
+    Player();
     void init() override;
     void setColorPalette(const ColorPalette &colorPalette);
+    size_t getCollisionPointCount() override { return 3; } ;
+
     // Since the player is a concave shape, we don't want to factor in
     // the interior point; it may cause minor inconsistencies, but likely
     // few and far between, where a very acute angle manages to squeeze
     // into the gap. Only possible if the player flys at a vertex and turns
     // 180 degrees and floats into it.
-    std::size_t getPointCount() const override { return 3; }
+    // std::size_t getPointCount() const override { return 3; }
+
+    // Currently doesn't work. Might need to use a bit flag to indicate that it's the player
+    // during collision detection.
 
 private:
     void update(float delta) override;
