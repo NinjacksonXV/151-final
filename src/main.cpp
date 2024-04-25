@@ -5,7 +5,6 @@
 #include "GameObjects/TestObject.hpp"
 #include "Icon.cpp"
 #include "GameObjects/Asteroid.hpp"
-#include "GUI.hpp"
 #define M_TAU (M_PI * 2.0f)
 
 sf::RenderTarget const *windowAccessor; // Make this a public static accessor of Game class later

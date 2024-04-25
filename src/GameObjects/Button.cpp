@@ -1,14 +1,7 @@
 #include "Button.hpp"
 
-Button::Button(std::string s, sf::Vector2f position, sf::Vector2f size)
-{
-    mButton.setSize(size);
-    mButton.setOrigin(mButton.getSize().x/2, mButton.getSize().y/2);
-    mPosition = position;
-    mButton.setPosition(mPosition);
-
-    mButton.setFillColor(sf::Color (0, 0, 0, 0)); //Change alpha to 0
-
+Button::Button(std::string s, sf::Vector2f position, unsigned int fontSize)
+{   
     if(!mFont.loadFromFile("HelvetiPixel.ttf"))
     {
         std::cout << "Error opening font file.\n";
@@ -17,10 +10,14 @@ Button::Button(std::string s, sf::Vector2f position, sf::Vector2f size)
 
     mText.setFont(mFont);
     mText.setString(s);
-
-    unsigned int fontSize = mButton.getGlobalBounds().height;
     mText.setCharacterSize(fontSize);
 
+    mButton.setSize({mText.getLocalBounds().width + 10, mText.getLocalBounds().height + 15});
+    mButton.setOrigin(mButton.getSize().x/2, mButton.getSize().y/2);
+    mPosition = position;
+    mButton.setPosition(mPosition);
+
+    mButton.setFillColor(sf::Color (0, 0, 0, 0)); //Change alpha to 0
 
     mText.setOrigin(mText.getGlobalBounds().width/2, mText.getGlobalBounds().height/2);
     mText.setPosition(mPosition.x, mPosition.y - fontSize/2);
@@ -38,7 +35,7 @@ Button::Button(std::string s, sf::Vector2f position, sf::Vector2f size)
     mTriangle.setRotation(90);
     mTriangle.setScale(1, 3);
 
-    mTriangle.setPosition(mPosition.x - (mButton.getSize().x/2), mPosition.y);
+    mTriangle.setPosition(mPosition.x - (mButton.getLocalBounds().width/2) - (mTriangle.getScale().y * mTriangle.getRadius()), mPosition.y);
 
 }
 
@@ -56,13 +53,15 @@ void Button::update(sf::Event &e, sf::RenderWindow &window)
         if(mouseInButton)
         {
             mText.setFillColor(mTextHover);
-            mTriangle.setPosition(mPosition.x - (mButton.getSize().x/2), mPosition.y);
+            mTriangle.setPosition(mPosition.x - (mButton.getLocalBounds().width/2) - (mTriangle.getScale().y * mTriangle.getRadius()), mPosition.y);
             isSelected = true;
+            isClicked = false;
         }
         else
         {
             mText.setFillColor(mTextNormal);
             isSelected = false;
+            isClicked = false;
         }
     }
 
@@ -72,7 +71,7 @@ void Button::update(sf::Event &e, sf::RenderWindow &window)
         {
             if(mouseInButton)
             {
-                //play sound 
+                isClicked = true;
             }
         }
     }
@@ -84,13 +83,15 @@ void Button::update(sf::Event &e, sf::RenderWindow &window)
             if(mouseInButton)
             {
                 mText.setFillColor(mTextHover);
-                mTriangle.setPosition(mPosition.x - (mButton.getSize().x/2), mPosition.y);
+                mTriangle.setPosition(mPosition.x - (mButton.getLocalBounds().width/2) - (mTriangle.getScale().y * mTriangle.getRadius()), mPosition.y);
                 isSelected = true;
+                isClicked = true;
             }
             else
             {
                 mText.setFillColor(mTextNormal);
                 isSelected = false;
+                isClicked = false;
             }
         }
     }

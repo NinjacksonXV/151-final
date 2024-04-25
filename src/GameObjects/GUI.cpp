@@ -1,8 +1,8 @@
 #include "GUI.hpp"
 
-void GUI::addButton(std::string s, sf::Vector2f position, sf::Vector2f size)
+void GUI::addButton(std::string s, sf::Vector2f position, unsigned int fontSize)
 {
-    Button *button = new Button(s, position, size);
+    Button *button = new Button(s, position, fontSize);
     buttons.push_back(button);
 }
 

@@ -5,18 +5,18 @@
 #include <vector>
 #include <string>
 #include "Button.hpp"
-#include "GameObject.hpp"
 #include "Text.hpp"
 
 
 class GUI : public sf::Drawable
 {
 public:
-    void addButton(std::string s, sf::Vector2f position, sf::Vector2f size);
+    void addButton(std::string s, sf::Vector2f position, unsigned int fontSize = 40);
     void removeAllButtons(){buttons.clear();};
     void addText(std::string s, sf::Vector2f position, unsigned size, sf::Color fillColor);
     void changeText(std::string newString, int index);
     void changeText(int newNumber, int index);
+    bool isClicked(int index){return buttons[index]->onClick();};
     void removeAllTexts(){texts.clear();};
 
     virtual void update(sf::Event &e, sf::RenderWindow &window);
