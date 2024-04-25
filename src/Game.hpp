@@ -2,6 +2,7 @@
 #include <vector>
 #include <SFML/Graphics.hpp>
 #include "GameObjects/GameObject.hpp"
+#include "GameObjects/GameplayShape.hpp"
 #include "ColorPalette.hpp"
 #include "Colorable.hpp"
 
@@ -31,8 +32,8 @@ public:
         }
     }
     void GameLoop();
-    void HandleCollision();
-    static const sf::RenderWindow *const windowAccessor;
+    void HandleCollision(CollisionLayer layer);
+    static const sf::RenderWindow *const window;
 
     static ColorPalette getColorPalette() { return currentPalette; }
     static void setColorPalette(ColorPalette colorPalette) { currentPalette = colorPalette; }
