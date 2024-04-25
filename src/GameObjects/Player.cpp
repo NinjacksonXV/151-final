@@ -21,13 +21,19 @@ AsteroidMath::Vector2 velocity;
 
 sf::Vector2f distanceToScreenEdge;
 
+Player::Player()
+{
+    this->collisionLayer = C_Player | C_Asteroid;
+}
+
 void Player::init()
 {
     this->setPointCount(4);
-    setPoint(0, {30, 10});
-    setPoint(1, {0, 0});
-    setPoint(2, {-30, 10});
-    setPoint(3, {0, -40});
+    // When detecting collision, you need to transform these points by the player transform. Put this logic in GameplayShape
+    setPoint(0, {-30, 10});
+    setPoint(1, {0, -40});
+    setPoint(2, {30, 10});
+    setPoint(3, {0, 0});
     Object2D::setOrigin({0, -5});
     setFillColor(Game::getColorPalette().primary);
     setOutlineColor(Game::getColorPalette().secondary);
@@ -41,10 +47,11 @@ void Player::init()
         child->init();
 }
 
-void Player::setColorPalette(ColorPalette colorPalette)
+void Player::setColorPalette(const ColorPalette &colorPalette)
 {
     this->setFillColor(colorPalette.primary);
     this->setOutlineColor(colorPalette.secondary);
+    stars->setColorPalette(colorPalette);
 }
 
 void Player::update(float delta)

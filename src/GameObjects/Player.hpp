@@ -10,11 +10,24 @@ class TempStars;
 class Player : public GameplayShape
 {
 public:
+    Player();
     void init() override;
-    void setColorPalette(ColorPalette colorPalette) override;
+    void setColorPalette(const ColorPalette &colorPalette);
+    size_t getCollisionPointCount() override { return 3; } ;
+
+    // Since the player is a concave shape, we don't want to factor in
+    // the interior point; it may cause minor inconsistencies, but likely
+    // few and far between, where a very acute angle manages to squeeze
+    // into the gap. Only possible if the player flys at a vertex and turns
+    // 180 degrees and floats into it.
+    // std::size_t getPointCount() const override { return 3; }
+
+    // Currently doesn't work. Might need to use a bit flag to indicate that it's the player
+    // during collision detection.
+
 private:
     void update(float delta) override;
-    TempStars* stars;
+    TempStars *stars;
 };
 
 // TO-DO: Move this into its own header/compilation unit
@@ -22,32 +35,28 @@ private:
  * @brief This is the current star visual. It's essentially a rectangle that stays in the center of the screen, and takes in the player position to scroll
  * the UV of a (relatively) simple star shader. It gives a nice effect, and is cheap to draw.
  *
- * Later, I'll update the shader so that it's possible to pass in the color palette.
- *
  */
 class TempStars : public Object2D, public Colorable
 {
 public:
-    // Window size values are hardcoded and should be redone.
     void init() override
     {
         sf::Vector2f winSize(gameViewAccessor->getSize().x, gameViewAccessor->getSize().y);
-        rect = sf::RectangleShape(winSize);
-        // std::cout << windowAccessor->getSize().x << ", " << windowAccessor->getSize().y;
+        backgroundRect = sf::RectangleShape(winSize);
+        starRect = sf::RectangleShape(winSize);
         if (!shader.loadFromFile("stars.frag", sf::Shader::Fragment))
             std::cout << "Didn't load shader\n";
 
-        
         setColorPalette(Game::getColorPalette());
 
         shader.setUniform("u_resolution", winSize);
-        
-        setOrigin(this->rect.getSize().x / 2.f, this->rect.getSize().x / 2.f);
 
+        this->setOrigin(this->starRect.getSize().x / 2.f, this->starRect.getSize().x / 2.f);
         renderState.shader = &shader;
     }
-    void setColorPalette(ColorPalette colorPalette) override
+    void setColorPalette(const ColorPalette &colorPalette) override
     {
+        backgroundRect.setFillColor(colorPalette.primary);
         shader.setUniform("backgroundCol", sf::Glsl::Vec4(colorPalette.primary));
         shader.setUniform("starCol", sf::Glsl::Vec4(colorPalette.tertiary));
     }
@@ -55,8 +64,10 @@ public:
     {
         shaderPos += delta;
     }
+
 private:
-    sf::RectangleShape rect;
+    sf::RectangleShape starRect;
+    mutable sf::RectangleShape backgroundRect;
 
     sf::Vector2f shaderPos;
 
@@ -67,6 +78,7 @@ private:
     {
         renderState.transform = this->getTransform(); // Hack because this doesn't inherit from drawable
         shader.setUniform("position", sf::Vector2f(shaderPos.x, shaderPos.y * -1.f));
-        target.draw(rect, renderState);
+        target.draw(backgroundRect, this->getTransform());
+        target.draw(starRect, renderState);
     };
 };

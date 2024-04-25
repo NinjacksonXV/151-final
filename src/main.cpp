@@ -1,52 +1,46 @@
 #include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
+
 #define _USE_MATH_DEFINES
 #include <math.h>
+#define M_TAU (M_PI * 2.0f)
+
 #include "GameObjects/Player.hpp"
 #include "GameObjects/TestObject.hpp"
 #include "Icon.cpp"
 #include "GameObjects/Asteroid.hpp"
-#define M_TAU (M_PI * 2.0f)
+
+// #include "MusicHandler.hpp"
 
 sf::RenderTarget const *windowAccessor; // Make this a public static accessor of Game class later
 sf::View const *gameViewAccessor;
 
 const std::string colorShaderStr =
-"uniform sampler2D texture;"
-"uniform vec4 primary;"
-"uniform vec4 secondary;"
-"uniform vec4 tertiary;"
-""
-"void main(){"
-"vec4 color = gl_Color * texture2D(texture, gl_TexCoord[0].st);"
-"vec3 color1 = vec3(color.r * primary.r, color.r * primary.g, color.r * primary.b);"
-"vec3 color2 = vec3(color.g * secondary.r, color.g * secondary.g, color.g * secondary.b);"
-"vec3 color3 = vec3(color.b * tertiary.r, color.b * tertiary.g, color.b * tertiary.b);"
-"gl_FragColor = vec4(color1 + color2 + color3, 1.0);"
-// "gl_FragColor = vec4(0.0, 1.0, 0.0, 0.0);"
-"}"
-;
+    "uniform sampler2D texture;"
+    "uniform vec4 primary;"
+    "uniform vec4 secondary;"
+    "uniform vec4 tertiary;"
+    ""
+    "void main(){"
+    "vec4 color = gl_Color * texture2D(texture, gl_TexCoord[0].st);"
+    "vec3 color1 = vec3(color.r * primary.r, color.r * primary.g, color.r * primary.b);"
+    "vec3 color2 = vec3(color.g * secondary.r, color.g * secondary.g, color.g * secondary.b);"
+    "vec3 color3 = vec3(color.b * tertiary.r, color.b * tertiary.g, color.b * tertiary.b);"
+    "gl_FragColor = vec4(color1 + color2 + color3, 1.0);"
+    "}";
 
 // TO-DO: Move most of this logic to Game class
 int main()
 {
+    Game::setColorPalette(ColorPalette::basic);
     auto window = sf::RenderWindow{{1920u, 1080u}, "Asteroids", sf::Style::Titlebar | sf::Style::Close}; // This is nice to avoid resizing issues
+
     window.setIcon(icon.width, icon.height, icon.pixel_data);
     window.setFramerateLimit(144);
     windowAccessor = &window;
 
     Player player;
-    TestObject circle({10.0, 10.0});
-    std::vector<sf::Vector2f> a = {
-        {0.0f, 0.0f},
-        {20.0f, 0.0f},
-        {20.0f, 20.0f}};
-    Asteroid asteroidTest(
-        {{0.0f, 0.0f},
-         {100.0f, 0.0f},
-         {100.0f, 100.0f}},
-        sf::Vector2f(100.0f, -100.0f));
-    asteroidTest.Shape::setPosition(0.f, 0.f);
-    std::vector<GameObject *> gameObjects = {&player, &circle, &asteroidTest};
+    std::vector<GameObject *> gameObjects = {&player};
 
     sf::View gameView({0.f, 0.f}, sf::Vector2f(window.getSize().y, window.getSize().y));
     gameView.setViewport(sf::FloatRect((static_cast<float>(window.getSize().x) - static_cast<float>(window.getSize().y)) / 2.f / static_cast<float>(window.getSize().x), 0.f,
@@ -59,15 +53,14 @@ int main()
     sf::Shader colorShader;
     colorShader.loadFromMemory(colorShaderStr, sf::Shader::Fragment);
     colorShader.setUniform("texture", sf::Shader::CurrentTexture);
-    // colorShader.setUniform("primary", sf::Glsl::Vec4(sf::Color::Black)); 
-    // colorShader.setUniform("secondary", sf::Glsl::Vec4(sf::Color::White));
 
-    colorShader.setUniform("primary", sf::Glsl::Vec4(sf::Color::Black)); 
-    colorShader.setUniform("secondary", sf::Glsl::Vec4(sf::Color::White));
-
+    colorShader.setUniform("primary", sf::Glsl::Vec4(Game::getColorPalette().primary));
+    colorShader.setUniform("secondary", sf::Glsl::Vec4(Game::getColorPalette().secondary));
+    colorShader.setUniform("tertiary", sf::Glsl::Vec4(Game::getColorPalette().tertiary));
 
     sf::Texture door1Texture;
     door1Texture.loadFromFile("../../asset-source/door1.png");
+    door1Texture.generateMipmap();
     sf::Sprite door1_l(door1Texture), door1_r(door1Texture);
     door1_l.setScale(gameView.getSize().x / door1Texture.getSize().x, gameView.getSize().y / door1Texture.getSize().y);
     door1_r.setScale(gameView.getSize().x / door1Texture.getSize().x * -1.f, gameView.getSize().y / door1Texture.getSize().y);
@@ -75,7 +68,6 @@ int main()
     door1_l.setOrigin(door1Texture.getSize().x, 0.0f);
     door1_r.setOrigin(door1Texture.getSize().x, 0.0f);
 
-    // door1_l.setPosition((window.getSize().x - gameView.getSize().x) / 2.0f, 0.0);
     door1_l.setPosition(window.getSize().x / 2.0f - gameView.getSize().x / 2.0f, 0.0f);
     door1_r.setPosition((window.getSize().x - gameView.getSize().x) / 2.0f + gameView.getSize().x, 0.0f);
 
@@ -101,6 +93,22 @@ int main()
             }
         }
 
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::LAlt) && sf::Keyboard::isKeyPressed(sf::Keyboard::Enter))
+        {
+            window.create({1920, 1080}, "Asteroids", sf::Style::Fullscreen);
+            window.setFramerateLimit(144);
+        }
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::O))
+        {
+            Game::setColorPalette(ColorPalette::bumblebit);
+            player.setColorPalette(Game::getColorPalette());
+            colorShader.setUniform("primary", sf::Glsl::Vec4(Game::getColorPalette().primary));
+            colorShader.setUniform("secondary", sf::Glsl::Vec4(Game::getColorPalette().secondary));
+            colorShader.setUniform("tertiary", sf::Glsl::Vec4(Game::getColorPalette().tertiary));
+
+            // musicHandler.queueUp(musicFile2);
+        }
+
         window.clear();
         window.setView(gameView);
         for (GameObject *gameObject : gameObjects)
@@ -108,7 +116,6 @@ int main()
             gameObject->update(elapsed.asSeconds());
             gameObject->draw(window);
         }
-        door1_r.move(elapsed.asSeconds() * 3.f, 0.0f);
         window.setView(window.getDefaultView());
         window.draw(door1_l, &colorShader);
         window.draw(door1_r, &colorShader);

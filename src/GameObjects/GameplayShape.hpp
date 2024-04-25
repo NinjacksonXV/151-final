@@ -8,7 +8,9 @@ class GameplayShape : public Object2D, public sf::ConvexShape, public Colorable
 {
 public:
     sf::FloatRect getGlobalBounds() { return rect; };
-    virtual void setColorPalette(ColorPalette colorPalette) = 0;
+    virtual void setColorPalette(const ColorPalette &colorPalette) = 0;
+    virtual size_t getCollisionPointCount() { return this->getPointCount();}
+    short int collisionLayer;
 private:
     std::vector<sf::Vector2f> normals;
     std::vector<CollisionLayer> collisionLayers;

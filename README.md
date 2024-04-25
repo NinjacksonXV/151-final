@@ -5,7 +5,7 @@ Project for CS-151 final at North Idaho College, written in C++ and using [SFML]
 If you are building on Windows and using G++ via MSYS2, it is recommended to install SFML via the MSYS2 UCRT terminal with the following command:
 
 ```bash
-pacman -S mingw-w64-ucrt-x86_64-flac
+pacman -S mingw-w64-ucrt-x86_64-sfml
 ``` 
 
 From there, update the CMakeLists.txt file with the path to the OpenAL dll, e.g. `C:/msys64/ucrt64/bin/libopenal-1.dll` (note that this appears as OPENAL_PATH in the CMake cache for easy editing).
