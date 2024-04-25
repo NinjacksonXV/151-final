@@ -9,6 +9,7 @@
 #include "GameObjects/TestObject.hpp"
 #include "Icon.cpp"
 #include "GameObjects/Asteroid.hpp"
+#include "GameObjects/GUI.hpp"
 
 // #include "MusicHandler.hpp"
 
@@ -73,7 +74,29 @@ int main()
     door1_l.setPosition(window.getSize().x / 2.0f - gameView.getSize().x / 2.0f, 0.0f);
     door1_r.setPosition((window.getSize().x - gameView.getSize().x) / 2.0f + gameView.getSize().x, 0.0f);
 
+    // GUI STUFF
+    enum States{
+        MAIN,
+        PAUSED,
+        PLAYING
+    };
 
+    States state;
+
+    GUI score;
+    score.addText("0", {75, 75}, 30, sf::Color::White);
+
+    GUI mainMenu;
+    mainMenu.addButton("Play", {960, 540}, 100);
+    mainMenu.addButton("Options", {960, 340}, 100);
+
+    GUI pauseMenu;
+    pauseMenu.addButton("Continue", {960, 540}, 100);
+    pauseMenu.addButton("Quit", {960, 340}, 100);
+
+    bool useMenu = true;
+    bool usePause = false;
+    bool usePlaying = false;
 
     for (GameObject *gameObject : gameObjects)
     {
@@ -93,6 +116,25 @@ int main()
             {
                 gameView.setSize(event.size.width, event.size.height); // Currently unused since resizing is disabled. Wouldn't work in current state.
             }
+
+            if(useMenu)
+            mainMenu.update(event, window);
+
+            if(usePause)
+            pauseMenu.update(event, window);
+            score.update(event, window);
+
+            if(mainMenu.isClicked(0))
+            {
+                useMenu = false;
+                usePlaying = true;
+            }
+
+            if(usePlaying && sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))
+            {
+                usePause = true;
+            }
+
         }
 
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::LAlt) && sf::Keyboard::isKeyPressed(sf::Keyboard::Enter))
@@ -121,6 +163,25 @@ int main()
         window.setView(window.getDefaultView());
         window.draw(door1_l, &colorShader);
         window.draw(door1_r, &colorShader);
+
+        // GUI DRAW ************
+        if(useMenu)
+        window.draw(mainMenu);
+
+        if(usePause)
+        {
+            window.draw(pauseMenu);
+            window.draw(score);
+        }
+
+        if(usePlaying)
+        {
+            window.draw(score);
+        }
+
+        //**********************
+
+
         // std::cout << asteroidTest.getGlobalBounds();
 
         // if (player.getGlobalBounds().intersects(asteroidTest.getGlobalBounds()))
