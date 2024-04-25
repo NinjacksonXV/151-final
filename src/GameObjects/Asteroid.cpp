@@ -16,6 +16,12 @@ Asteroid::Asteroid(std::vector<sf::Vector2f> points, sf::Vector2f position)
     this->setOutlineThickness(4.0f);
 }
 
+
+void Asteroid::split()
+{
+
+}
+
 void Asteroid::update(float delta)
 {
     // std::cout << this->normals[0];
