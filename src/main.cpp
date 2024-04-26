@@ -13,11 +13,22 @@
 
 // #include "MusicHandler.hpp"
 
+enum GameState
+{
+    Menu = 1,
+    Paused = 2,
+    Playing = 3,
+    GameOver = 4
+};
+
 sf::RenderTarget const *windowAccessor; // Make this a public static accessor of Game class later
 sf::View const *gameViewAccessor;
 std::list<Bullet *> *bulletAccessor;
 std::list<Asteroid *> *asteroidAccessor;
 std::list<GameObject *> *gameObjectAccessor;
+
+int asteroidLimit = 15;
+float asteroidSpawnCooldown = 5.f;
 
 const std::string colorShaderStr =
     "uniform sampler2D texture;"
@@ -53,7 +64,6 @@ int main()
     bulletAccessor = &bullets;
     asteroidAccessor = &asteroids;
     gameObjectAccessor = &gameObjects;
-    Asteroid asteroid(4);
 
     sf::View gameView({0.f, 0.f}, sf::Vector2f(window.getSize().y, window.getSize().y));
     gameView.setViewport(sf::FloatRect((static_cast<float>(window.getSize().x) - static_cast<float>(window.getSize().y)) / 2.f / static_cast<float>(window.getSize().x), 0.f,
@@ -126,25 +136,6 @@ int main()
             {
                 gameView.setSize(event.size.width, event.size.height); // Currently unused since resizing is disabled. Wouldn't work in current state.
             }
-
-            if(useMenu)
-            mainMenu.update(event, window);
-
-            if(usePause)
-            pauseMenu.update(event, window);
-            score.update(event, window);
-
-            if(mainMenu.isClicked(0))
-            {
-                useMenu = false;
-                usePlaying = true;
-            }
-
-            if(usePlaying && sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))
-            {
-                usePause = true;
-            }
-
         }
 
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::LAlt) && sf::Keyboard::isKeyPressed(sf::Keyboard::Enter))
@@ -159,12 +150,6 @@ int main()
             colorShader.setUniform("primary", sf::Glsl::Vec4(Game::getColorPalette().primary));
             colorShader.setUniform("secondary", sf::Glsl::Vec4(Game::getColorPalette().secondary));
             colorShader.setUniform("tertiary", sf::Glsl::Vec4(Game::getColorPalette().tertiary));
-
-            // musicHandler.queueUp(musicFile2);
-        }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
-        {
-            asteroid.Object2D::move({0.f, -10.f});
 
             // musicHandler.queueUp(musicFile2);
         }
@@ -209,6 +194,13 @@ int main()
         }
         bullets.remove_if([](Bullet *bullet)
                           { return bullet->queueDelete; });
+
+        if (asteroids.size() < asteroidLimit && asteroidSpawnCooldown < 0.f)
+        {
+            new Asteroid(4);
+            asteroidSpawnCooldown = 5.f;
+        }
+        asteroidSpawnCooldown -= elapsed.asSeconds();
 
         window.setView(window.getDefaultView());
         window.draw(door1_l, &colorShader);

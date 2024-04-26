@@ -19,19 +19,47 @@ Asteroid::Asteroid(std::vector<sf::Vector2f> points, sf::Vector2f position)
 Asteroid::Asteroid(unsigned int size)
 {
     this->size = size;
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<float> pos(windowAccessor->getView().getSize().x / -2.f, windowAccessor->getView().getSize().x / 2.f);
+    std::uniform_real_distribution<float> speed(3.f, 35.f);
+    std::uniform_int_distribution<> side(1, 4);
+
+    asteroidAccessor->push_back(this);
     circumCirclePolygon();
+    std::cout << "Got here";
+    switch (side(gen))
+    {
+    case 1:
+        Object2D::setPosition(windowAccessor->getView().getSize().x / 2.f + this->getLocalBounds().height / 2.f, pos(gen));
+        break;
+    case 2:
+        Object2D::setPosition(windowAccessor->getView().getSize().x / -2.f - this->getLocalBounds().height / 2.f, pos(gen));
+    case 3:
+        Object2D::setPosition(pos(gen), windowAccessor->getView().getSize().x / 2.f + this->getLocalBounds().width / 2.f);
+        break;
+    case 4:
+        Object2D::setPosition(pos(gen), windowAccessor->getView().getSize().x / -2.f - this->getLocalBounds().width / 2.f);
+        break;
+    }
+    std::cout << "Got here2";
+
+    this->velocity = AsteroidMath::Vector2::UP;
+    velocity.rotate(pos(gen));
+    velocity *= speed(gen);
     // calculateCentroid();
     // this->Object2D::setOrigin(this->calculateCentroid());
     this->setColorPalette(Game::getColorPalette());
     this->setOutlineThickness(-4.0f);
-    asteroidAccessor->push_back(this);
+    std::cout << "Got here3";
+
 }
 
 Asteroid::Asteroid(unsigned int size, sf::Vector2f position)
 {
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::uniform_real_distribution<float> angles(0, -M_PI * 2.f);
+    std::uniform_real_distribution<float> angles(0, M_PI * 2.f);
 
     this->size = size;
     circumCirclePolygon();
@@ -40,7 +68,7 @@ Asteroid::Asteroid(unsigned int size, sf::Vector2f position)
     this->setColorPalette(Game::getColorPalette());
     this->setOutlineThickness(-4.0f);
     asteroidAccessor->push_back(this);
-    this->velocity = AsteroidMath::Vector2(angles(gen), angles(gen));
+    this->velocity = AsteroidMath::Vector2(angles(gen), angles(gen)) * angles(gen);
 }
 
 void Asteroid::setColorPalette(const ColorPalette &colorPalette)

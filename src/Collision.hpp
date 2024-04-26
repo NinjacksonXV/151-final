@@ -22,7 +22,7 @@ struct Projection
         max = min;
         for (size_t i = 1; i < shape.getCollisionPointCount(); i++)
         {
-            float p = axis.dotProduct(asAMVector2(shape.getPoint(i)));
+            float p = asAMVector2(shape.getPoint(i)).dotProduct(axis);
             if (p < min)
             {
                 min = p;
