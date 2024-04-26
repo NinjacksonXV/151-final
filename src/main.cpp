@@ -126,6 +126,25 @@ int main()
             {
                 gameView.setSize(event.size.width, event.size.height); // Currently unused since resizing is disabled. Wouldn't work in current state.
             }
+
+            if(useMenu)
+            mainMenu.update(event, window);
+
+            if(usePause)
+            pauseMenu.update(event, window);
+            score.update(event, window);
+
+            if(mainMenu.isClicked(0))
+            {
+                useMenu = false;
+                usePlaying = true;
+            }
+
+            if(usePlaying && sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))
+            {
+                usePause = true;
+            }
+
         }
 
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::LAlt) && sf::Keyboard::isKeyPressed(sf::Keyboard::Enter))
