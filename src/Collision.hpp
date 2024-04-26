@@ -1,22 +1,40 @@
 #pragma once
+#include "GameObjects/Player.hpp"
+#include "GameObjects/Bullet.hpp"
+#include "GameObjects/Asteroid.hpp"
+
 #include <vector>
 
-enum class CollisionLayer
+class Collision
 {
-    c_Player,
-    c_Asteroid,
-    c_Bullet
+public:
+    static bool checkForCollision(Bullet *bullet, Asteroid *asteroid);
+    static void checkForCollision(Player *player, Asteroid *asteroid);
 };
 
-class Collidable
+struct Projection
 {
-    private:
-    std::vector<CollisionLayer> collisionLayers;
-    void initializeCollision()
+    float min;
+    float max;
+    Projection(GameplayShape &shape, AsteroidMath::Vector2 axis)
     {
-        // for (CollisionLayer collisionLayer : collisionLayers)
-        // {
-        //     Game::
-        // }
-    };
+        min = axis.dotProduct(asAMVector2(shape.getPoint(0)));
+        max = min;
+        for (size_t i = 1; i < shape.getCollisionPointCount(); i++)
+        {
+            float p = axis.dotProduct(asAMVector2(shape.getPoint(i)));
+            if (p < min)
+            {
+                min = p;
+            }
+            else if (p > max)
+            {
+                max = p;
+            }
+        }
+    }
+    bool overlaps(Projection projection)
+    {
+        return std::max(0.f, std::min(this->max, projection.max) - std::max(this->min, projection.min));
+    }
 };

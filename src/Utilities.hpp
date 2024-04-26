@@ -4,6 +4,7 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
 #include <math.h>
+#include "AsteroidMath/Vector2.hpp"
 
 template <typename T>
 std::ostream &operator<<(std::ostream &out, const sf::Vector2<T> &vector)
@@ -55,3 +56,5 @@ int sign(T val)
 {
     return (T(0) < val) - (val < T(0));
 }
+
+AsteroidMath::Vector2 asAMVector2(sf::Vector2f vector2f);

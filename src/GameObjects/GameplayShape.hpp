@@ -3,25 +3,27 @@
 #include "Object2D.hpp"
 #include "../Utilities.hpp"
 #include "../Colorable.hpp"
-#include "../Collision.hpp"
 
-class GameplayShape : public Object2D, public sf::ConvexShape, public Colorable, public Collidable
+class GameplayShape : public Object2D, public sf::ConvexShape, public Colorable
 {
 public:
+    using Object2D::draw;
     sf::FloatRect getGlobalBounds() { return rect; };
     virtual void setColorPalette(const ColorPalette &colorPalette) = 0;
     virtual size_t getCollisionPointCount() { return this->getPointCount();}
-    short int collisionLayer;
+
+    std::vector<sf::Vector2f> getAxes();
+
+    sf::Vector2f getVelocity() const {return this->velocity;}
+    void calculateNormals();
 private:
     std::vector<sf::Vector2f> normals;
-    std::vector<CollisionLayer> collisionLayers;
-    void calculateNormals();
     void onDraw(sf::RenderTarget &target, const sf::Transform &transform) const
     {
         rect = transform.transformRect(getLocalBounds());
         target.draw(*this, transform);
-    };
-    void calculateCollision(std::vector<Collidable> colliderVector);
+    }
 protected:
+    AsteroidMath::Vector2 velocity = AsteroidMath::Vector2::ZERO;
     mutable sf::FloatRect rect;
 };

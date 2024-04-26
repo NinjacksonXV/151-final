@@ -1,36 +1,23 @@
 #pragma once
 #include "GameplayShape.hpp"
+#include "Bullet.hpp"
+#include "AccelerationLine.hpp"
 #include "../Utilities.hpp"
 
-extern sf::RenderTarget const *windowAccessor;
 extern sf::View const *gameViewAccessor;
-
-class TempStars;
+extern sf::RenderTarget const *windowAccessor;
 
 class Player : public GameplayShape
 {
 public:
-    Player();
-    void init() override;
+    void init();
+    void update(float delta);
+
     void setColorPalette(const ColorPalette &colorPalette);
-    size_t getCollisionPointCount() override { return 3; } ;
-
-    // Since the player is a concave shape, we don't want to factor in
-    // the interior point; it may cause minor inconsistencies, but likely
-    // few and far between, where a very acute angle manages to squeeze
-    // into the gap. Only possible if the player flys at a vertex and turns
-    // 180 degrees and floats into it.
-    // std::size_t getPointCount() const override { return 3; }
-
-    // Currently doesn't work. Might need to use a bit flag to indicate that it's the player
-    // during collision detection.
-
-private:
-    void update(float delta) override;
-    TempStars *stars;
+    size_t getCollisionPointCount() override { return 3; };
 };
 
-// TO-DO: Move this into its own header/compilation unit
+// TO-DO: Move this into its own header/compilation unit. Actually... this is never getting done. Hah.
 /**
  * @brief This is the current star visual. It's essentially a rectangle that stays in the center of the screen, and takes in the player position to scroll
  * the UV of a (relatively) simple star shader. It gives a nice effect, and is cheap to draw.
@@ -57,7 +44,7 @@ public:
     void setColorPalette(const ColorPalette &colorPalette) override
     {
         backgroundRect.setFillColor(colorPalette.primary);
-        shader.setUniform("backgroundCol", sf::Glsl::Vec4(colorPalette.primary));
+        // shader.setUniform("backgroundCol", sf::Glsl::Vec4(colorPalette.primary));
         shader.setUniform("starCol", sf::Glsl::Vec4(colorPalette.tertiary));
     }
     void updatePosition(sf::Vector2f delta)

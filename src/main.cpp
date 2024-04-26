@@ -9,13 +9,15 @@
 #include "GameObjects/TestObject.hpp"
 #include "Icon.cpp"
 #include "GameObjects/Asteroid.hpp"
+#include "Collision.hpp"
 
 // #include "MusicHandler.hpp"
 
 sf::RenderTarget const *windowAccessor; // Make this a public static accessor of Game class later
 sf::View const *gameViewAccessor;
-
-sf::Font font;
+std::list<Bullet *> *bulletAccessor;
+std::list<Asteroid *> *asteroidAccessor;
+std::list<GameObject *> *gameObjectAccessor;
 
 const std::string colorShaderStr =
     "uniform sampler2D texture;"
@@ -39,10 +41,19 @@ int main()
 
     window.setIcon(icon.width, icon.height, icon.pixel_data);
     window.setFramerateLimit(144);
+    window.setVerticalSyncEnabled(true);
     windowAccessor = &window;
 
     Player player;
-    std::vector<GameObject *> gameObjects = {&player};
+    TempStars stars;
+    // Asteroid asteroid({{0.f, 0.f},{25.f, 0.f},{54.f, 30.f},{36.f, 45.f},{-10.f, 70.f},{-20.f, 35.f},{-25.f, 10.f}}, {0.f, 0.f});
+    std::list<GameObject *> gameObjects = {&stars, &player};
+    std::list<Bullet *> bullets;
+    std::list<Asteroid *> asteroids;
+    bulletAccessor = &bullets;
+    asteroidAccessor = &asteroids;
+    gameObjectAccessor = &gameObjects;
+    Asteroid asteroid(4);
 
     sf::View gameView({0.f, 0.f}, sf::Vector2f(window.getSize().y, window.getSize().y));
     gameView.setViewport(sf::FloatRect((static_cast<float>(window.getSize().x) - static_cast<float>(window.getSize().y)) / 2.f / static_cast<float>(window.getSize().x), 0.f,
@@ -86,12 +97,14 @@ int main()
     test1.setLoop(true);
     test2.setLoop(true);
 
-    test1.play();
+    // test1.play();
 
     sf::Sound soundTest;
     sf::SoundBuffer soundTestBuffer;
     soundTestBuffer.loadFromFile("../../asset-source/music/drums.wav");
     soundTest.setBuffer(soundTestBuffer);
+
+    soundTest.setLoop(true);
 
     soundTest.play();
 
@@ -130,23 +143,57 @@ int main()
 
             // musicHandler.queueUp(musicFile2);
         }
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
+        {
+            asteroid.Object2D::move({0.f, -10.f});
+
+            // musicHandler.queueUp(musicFile2);
+        }
 
         window.clear();
         window.setView(gameView);
+
+        asteroids.remove_if([](Asteroid *asteroid)
+                            { return asteroid->queueDelete; });
+
+        gameObjects.remove_if([](GameObject *gameObject)
+                              { return gameObject->queueDelete; });
+
         for (GameObject *gameObject : gameObjects)
         {
             gameObject->update(elapsed.asSeconds());
             gameObject->draw(window);
         }
+        for (Asteroid *asteroid : asteroids)
+        {
+            asteroid->update(elapsed.asSeconds());
+            asteroid->draw(window);
+            if (asteroid->getGlobalBounds().intersects(player.getGlobalBounds()))
+            {
+                Collision::checkForCollision(&player, asteroid);
+            }
+        }
+        stars.updatePosition(player.getVelocity());
+
+        for (Bullet *bullet : bullets)
+        {
+            bullet->update(elapsed.asSeconds());
+            bullet->Object2D::draw(window);
+            for (Asteroid *asteroid : asteroids)
+            {
+                if (asteroid->getGlobalBounds().contains(bullet->Object2D::getPosition()))
+                {
+                    if (Collision::checkForCollision(bullet, asteroid))
+                        break;
+                }
+            }
+        }
+        bullets.remove_if([](Bullet *bullet)
+                          { return bullet->queueDelete; });
+
         window.setView(window.getDefaultView());
         window.draw(door1_l, &colorShader);
         window.draw(door1_r, &colorShader);
-        // std::cout << asteroidTest.getGlobalBounds();
-
-        // if (player.getGlobalBounds().intersects(asteroidTest.getGlobalBounds()))
-        // {
-        //     std::cout << "AABB collision\n";
-        // }
         window.display();
     }
 }
@@ -177,58 +224,3 @@ const std::string shapeFragShader =
     "vec2 uv = vec2(gl_FragCoord.xy / u_resolution);"
     "gl_FragColor = blur13(image, uv, u_resolution, vec2(.5,.2));"
     "}";
-
-// int main()
-// {
-//     sf::RenderWindow window(sf::VideoMode(800, 600), "SFML Shader Glow Effect");
-
-//     // sf::CircleShape circle(100.0f);
-//     // circle.setPosition(300, 200);
-//     // circle.setFillColor(sf::Color::White);
-
-//     sf::RectangleShape stars(static_cast<sf::Vector2f>(window.getSize()));
-//     stars.setFillColor(sf::Color::Black);
-
-//     sf::Shader shapeShader;
-
-//     sf::ConvexShape shape(4);
-//     shape.setPoint(0, {30, -10});
-//     shape.setPoint(1, {0, 0});
-//     shape.setPoint(2, {-30, -10});
-//     shape.setPoint(3, {0, 40});
-//     shape.setFillColor(sf::Color::Black);
-//     shape.setOutlineColor(sf::Color::White);
-//     shape.setOutlineThickness(4.0f);
-//     shape.setPosition(50, 50);
-//     sf::RenderTexture rTexture;
-//     rTexture.create(100, 100);
-//     rTexture.draw(shape);
-//     shapeShader.loadFromMemory(shapeFragShader, sf::Shader::Fragment);
-//     shapeShader.setUniform("u_resolution", sf::Vector2f(window.getSize().x, window.getSize().y));
-//     shapeShader.setUniform("image", rTexture.getTexture());
-//     rTexture.getTexture().copyToImage().saveToFile("ship.png");
-//     return 0;
-//     sf::Sprite sprite(rTexture.getTexture());
-
-//     sf::Shader shader;
-//     sf::Shader starShader;
-
-//     sprite.setPosition(window.getSize().x / 2.0f, window.getSize().y / 2.0f);
-
-//     while (window.isOpen())
-//     {
-//         sf::Event event;
-//         while (window.pollEvent(event))
-//         {
-//             if (event.type == sf::Event::Closed)
-//                 window.close();
-//         }
-
-//         window.clear();
-//         window.draw(stars);
-//         window.draw(sprite, &shapeShader);
-//         window.display();
-//     }
-
-//     return 0;
-// }

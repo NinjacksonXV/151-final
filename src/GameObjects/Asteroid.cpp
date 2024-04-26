@@ -1,4 +1,8 @@
+#include <list>
+#include <random>
 #include "Asteroid.hpp"
+#define _USE_MATH_DEFINES
+#include <math.h>
 
 Asteroid::Asteroid(std::vector<sf::Vector2f> points, sf::Vector2f position)
 {
@@ -7,44 +11,101 @@ Asteroid::Asteroid(std::vector<sf::Vector2f> points, sf::Vector2f position)
     {
         setPoint(i, points[i]);
     }
-    calculateNormals();
     this->Object2D::setPosition(position);
-
-    this->setFillColor(sf::Color::Black);
-    this->setOutlineColor(sf::Color::White);
-    this->setOutlineThickness(4.0f);
+    this->setColorPalette(Game::getColorPalette());
+    this->setOutlineThickness(-4.0f);
 }
 
-
-void Asteroid::split()
+Asteroid::Asteroid(unsigned int size)
 {
+    this->size = size;
+    circumCirclePolygon();
+    // calculateCentroid();
+    // this->Object2D::setOrigin(this->calculateCentroid());
+    this->setColorPalette(Game::getColorPalette());
+    this->setOutlineThickness(-4.0f);
+    asteroidAccessor->push_back(this);
+}
 
+Asteroid::Asteroid(unsigned int size, sf::Vector2f position)
+{
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<float> angles(0, -M_PI * 2.f);
+
+    this->size = size;
+    circumCirclePolygon();
+    this->Object2D::setPosition(position);
+    // this->Object2D::setOrigin(this->calculateCentroid());
+    this->setColorPalette(Game::getColorPalette());
+    this->setOutlineThickness(-4.0f);
+    asteroidAccessor->push_back(this);
+    this->velocity = AsteroidMath::Vector2(angles(gen), angles(gen));
+}
+
+void Asteroid::setColorPalette(const ColorPalette &colorPalette)
+{
+    this->setFillColor(colorPalette.primary);
+    this->setOutlineColor(colorPalette.secondary);
 }
 
 void Asteroid::update(float delta)
 {
-    // std::cout << this->normals[0];
+    Object2D::move(velocity * delta * 10.f);
+    if (Object2D::getPosition().x > windowAccessor->getView().getSize().x / 2.f + getGlobalBounds().width / 2.f || Object2D::getPosition().x < windowAccessor->getView().getSize().x / -2.0f - getGlobalBounds().width / 2.f)
+    {
+        Object2D::setPosition(-1 * sign(this->Object2D::getPosition().x) * (windowAccessor->getView().getSize().x / 2.f + getGlobalBounds().width / 2.f), Object2D::getPosition().y);
+    }
+    if (Object2D::getPosition().y > windowAccessor->getView().getSize().y / 2.0f + getGlobalBounds().height / 2.f || Object2D::getPosition().y < windowAccessor->getView().getSize().y / -2.0f - getGlobalBounds().height / 2.f)
+    {
+        Object2D::setPosition(Object2D::getPosition().x, -1 * sign(this->Object2D::getPosition().y) * (windowAccessor->getView().getSize().y / 2.f + getGlobalBounds().height / 2.f));
+    }
 }
 
-void Asteroid::calculateNormals()
+/**
+ * @brief Called when a bullet hits. Provides the position of the bullet during impact and the indices of the polygons where the collision occured.
+ *
+ * @param position
+ * @param point1
+ * @param point2
+ */
+void Asteroid::impact(sf::Vector2f position, size_t point1, size_t point2)
 {
-    if (this->normals.capacity() != this->getPointCount())
+    queueDelete = true;
+}
+void Asteroid::impact()
+{
+    if (this->size > 1)
     {
-        this->normals.resize(this->getPointCount());
+        new Asteroid(size - 1, this->Object2D::getPosition());
+        new Asteroid(size - 1, this->Object2D::getPosition());
     }
-    for (size_t i = 0; i < this->getPointCount(); i++)
-    {
-        sf::Vector2f p1 = this->getPoint(i); // I need a toGlobal() function for this and the one following.
-        sf::Vector2f p2 = this->getPoint(i + 1 == this->getPointCount() ? 0 : i + 1);
-
-        sf::Vector2f edge = p1 - p2;
-        AsteroidMath::Vector2 normal = {edge.y * -1, edge.x};
-        normal.normalize();
-        this->normals[i] = normal;
-        std::cout << i + 1 << ". " << normal << '\n';
-    }
+    queueDelete = true;
 }
 
+// void Asteroid::calculateNormals()
+// {
+//     if (this->normals.capacity() != this->getPointCount())
+//     {
+//         this->normals.resize(this->getPointCount());
+//     }
+//     for (size_t i = 0; i < this->getPointCount(); i++)
+//     {
+//         sf::Vector2f p1 = this->getPoint(i); // I need a toGlobal() function for this and the one following.
+//         sf::Vector2f p2 = this->getPoint(i + 1 == this->getPointCount() ? 0 : i + 1);
+
+//         sf::Vector2f edge = p1 - p2;
+//         AsteroidMath::Vector2 normal = {edge.y * -1, edge.x};
+//         normal.normalize();
+//         this->normals[i] = normal;
+//     }
+// }
+
+/**
+ * @brief Calculates the centroid of the polygon. Currently not functional...
+ *
+ * @return sf::Vector2f central point
+ */
 sf::Vector2f Asteroid::calculateCentroid()
 {
     sf::Vector2f centroid;
@@ -76,8 +137,57 @@ sf::Vector2f Asteroid::calculateCentroid()
     centroid.y += (y0 + y1) * a;
 
     signedArea *= 0.5;
-    centroid.x /= (6.0*signedArea);
-    centroid.y /= (6.0*signedArea);
-
+    centroid.x /= (6.0 * signedArea);
+    centroid.y /= (6.0 * signedArea);
     return centroid;
+}
+
+/**
+ * @brief Generates a circle-based polygon.
+ *
+ * Source: https://observablehq.com/@magrawala/random-convex-polygon
+ *
+ */
+void Asteroid::circumCirclePolygon()
+{
+    float tooCloseThresholdRad = 10.f * 3.14159625 / 180.f;
+
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<int> pointCount(4 + size, 5 * size);
+    std::uniform_real_distribution<float> angles(0.0f, 1.0f);
+
+    float radius = size * 40;
+
+    size_t n = pointCount(gen);
+    this->setPointCount(n);
+
+    std::vector<float> vertAngles;
+    for (size_t i = 0; i < n; i++)
+    {
+        float angle = angles(gen) * M_PI * 2.f;
+        bool tooClose = false;
+        for (float prevAngle : vertAngles)
+        {
+            float minAng = std::min(angle, prevAngle);
+            float maxAng = std::max(angle, prevAngle);
+
+            float diff = maxAng - minAng;
+            if (diff < tooCloseThresholdRad || 2 * M_PI - diff < tooClose)
+            {
+                tooClose = true;
+                break;
+            }
+        }
+        if (tooClose == false)
+            vertAngles.push_back(angle);
+        else
+            i--;
+    }
+    std::sort(vertAngles.begin(), vertAngles.end()); // Check back to see if this needs this sorting algorithm: [](float a, float b){ return a - b;}
+
+    for (size_t i = 0; i < n; i++)
+    {
+        this->setPoint(i, {radius * cos(vertAngles[i]), radius * sin(vertAngles[i])});
+    }
 }

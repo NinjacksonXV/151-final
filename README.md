@@ -8,7 +8,7 @@ If you are building on Windows and using G++ via MSYS2, it is recommended to ins
 pacman -S mingw-w64-ucrt-x86_64-sfml
 ``` 
 
-From there, update the CMakeLists.txt file with the path to the OpenAL dll, e.g. `C:/msys64/ucrt64/bin/libopenal-1.dll` (note that this appears as OPENAL_PATH in the CMake cache for easy editing).
+From there, if you are on Windows, update the CMakeLists.txt file with the path to the OpenAL dll, e.g. `C:/msys64/ucrt64/bin/libopenal-1.dll` (note that this appears as OPENAL_PATH in the CMake cache for easy editing).
 
 > [!IMPORTANT] 
 > Currently, it's required to manually move any shaders (i.e. stars.frag) to `build/bin`. While this can be automated with CMake down the line, it makes editing shaders awkward; since the shaders are loaded at runtime, it's possible to modify the shaders without rebuilding the project, which is very quick. 

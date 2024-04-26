@@ -29,3 +29,8 @@ float toDegrees(float radians)
 {
     return radians * (180 / M_PI);
 }
+
+AsteroidMath::Vector2 asAMVector2(sf::Vector2f vector2f)
+{
+    return {vector2f.x, vector2f.y};
+}

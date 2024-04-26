@@ -25,6 +25,7 @@ public:
      */
     virtual void draw(sf::RenderTarget &target) const = 0;
     short int flags;  
+    bool queueDelete = false;
 
 private:
     sf::RenderTarget *renderTarget; // Currently unused

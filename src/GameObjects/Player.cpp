@@ -1,5 +1,4 @@
 #include "Player.hpp"
-#include "../Utilities.hpp"
 #include <math.h>
 
 // Script variables are here for ease of use.
@@ -15,16 +14,12 @@ float rotationDeltaSpeedBoost = 1.5f;
 
 float turnAroundSpeedBoostThreshold = -.8f;
 float turnAroundSpeedBoost = 2.f;
+float accelerationVisualCooldownLimit = .07f;
+float accelerationVisualCooldown = 0.f;
+
+bool spacePressed = false;
 
 AsteroidMath::Vector2 direction;
-AsteroidMath::Vector2 velocity;
-
-sf::Vector2f distanceToScreenEdge;
-
-Player::Player()
-{
-    this->collisionLayer = C_Player | C_Asteroid;
-}
 
 void Player::init()
 {
@@ -40,18 +35,12 @@ void Player::init()
     setOutlineThickness(4.0f);
 
     direction = AsteroidMath::Vector2::UP;
-    TempStars *stars = new TempStars();
-    this->stars = stars;
-    children.push_back(stars);
-    for (Object2D *child : children)
-        child->init();
 }
 
 void Player::setColorPalette(const ColorPalette &colorPalette)
 {
     this->setFillColor(colorPalette.primary);
     this->setOutlineColor(colorPalette.secondary);
-    stars->setColorPalette(colorPalette);
 }
 
 void Player::update(float delta)
@@ -70,38 +59,34 @@ void Player::update(float delta)
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
     {
-        // if (velocity.getLength() < minAccelerationVelocity && velocity.normalized().dotProduct(direction) > 0) velocity = direction * minAccelerationVelocity;
         velocity += direction * delta * acceleration;
-        // * (velocity.normalized().dotProduct(direction) < turnAroundSpeedBoostThreshold
-        //  ? turnAroundSpeedBoost
-        //  : 1.f);
-
-        // std::cout << velocity.normalized().dotProduct(direction) << '\n';
-        // if (velocity.normalized().dotProduct(direction) < 0.f)
-        // {
-        //     std::cout << velocity.dotProduct(direction)
-        //     << " * "
-        //     << turnAroundSpeedBoost
-        //     << " = "
-        //     << velocity.normalized().dotProduct(direction) * turnAroundSpeedBoost << '\n';
-        // }
-        
-        // * (rotationDelta ? rotationDeltaSpeedBoost : 1.f);
+        if (accelerationVisualCooldown <= 0)
+        {
+            sf::Vector2f temp((direction * 15).getX(), (direction * 15).getY());
+            new AccelerationLine(this->Object2D::getPosition() - temp, direction);
+            accelerationVisualCooldown = accelerationVisualCooldownLimit;
+        }
     }
     else
     {
         velocity -= velocity * delta * deceleration;
     }
-
-    distanceToScreenEdge =
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
+    {
+        if (spacePressed == false)
         {
-            this->Object2D::getPosition().x - windowAccessor->getView().getSize().x / 2.f - getGlobalBounds().width / 2.f,
-            this->Object2D::getPosition().y - windowAccessor->getView().getSize().y / 2.f - getGlobalBounds().height / 2.f};
-
+            new Bullet(direction, Object2D::getPosition());
+            spacePressed = true;
+        }
+    }
+    if (!sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
+    {
+        spacePressed = false;
+    }
+    accelerationVisualCooldown -= delta;
     velocity = velocity.limitLength(maxSpeed);
 
     Object2D::move(velocity);
-    stars->updatePosition(velocity);
 
     // Screen wrapping
     if (Object2D::getPosition().x > windowAccessor->getView().getSize().x / 2.f + getGlobalBounds().width / 2.f || Object2D::getPosition().x < windowAccessor->getView().getSize().x / -2.0f - getGlobalBounds().width / 2.f)
@@ -111,11 +96,5 @@ void Player::update(float delta)
     if (Object2D::getPosition().y > windowAccessor->getView().getSize().y / 2.0f + getGlobalBounds().height / 2.f || Object2D::getPosition().y < windowAccessor->getView().getSize().y / -2.0f - getGlobalBounds().height / 2.f)
     {
         Object2D::setPosition(Object2D::getPosition().x, -1 * sign(this->Object2D::getPosition().y) * (windowAccessor->getView().getSize().y / 2.f + getGlobalBounds().height / 2.f));
-    }
-
-    for (Object2D *child : children)
-    {
-        child->update(delta);
-        break;
     }
 }

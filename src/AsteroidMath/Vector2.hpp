@@ -23,12 +23,16 @@ namespace AsteroidMath
         void setY(float y);
 
         // void operator=(const AsteroidMath::Vector2 &sfVector);
-        void operator=(const sf::Vector2f &sfVector);
+        // void operator=(const sf::Vector2f &sfVector);
+        AsteroidMath::Vector2 operator=(const sf::Vector2f &sfVector);
         void operator+=(const Vector2 &vector);
         void operator-=(const Vector2 &vector);
-        AsteroidMath::Vector2 operator*(auto scalar) const
+
+        Vector2 operator-(const Vector2 &vector);
+
+        float getDistanceTo(const sf::Vector2f &vector);
+        AsteroidMath::Vector2 operator*(auto scalar)
         {
-            // AsteroidMath::Vector2 returnVector(this->x * static_cast<float>(scalar), this->y * static_cast<float>(scalar));
             return {this->x * static_cast<float>(scalar), this->y * static_cast<float>(scalar)};
         }
 

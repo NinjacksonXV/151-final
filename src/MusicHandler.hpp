@@ -1,7 +1,8 @@
 #pragma once
 #include <queue>
 #include "LoopingMusic.hpp"
-
+#define _USE_MATH_DEFINES
+#include <math.h>
 class LoopingMusic;
 
 class MusicHandler

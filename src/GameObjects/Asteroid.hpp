@@ -1,25 +1,31 @@
 #pragma once
-#include "Object2D.hpp"
+
 #include "../Utilities.hpp"
-class Asteroid : public Object2D, public sf::ConvexShape
+#include "GameplayShape.hpp"
+
+extern sf::RenderTarget const *windowAccessor;
+
+class Asteroid : public GameplayShape
 {
 public:
     Asteroid(std::vector<sf::Vector2f> points, sf::Vector2f position);
-    std::vector<sf::Vector2f> getNormals() {return normals;}
-    sf::FloatRect getGlobalBounds()
-    {
-        return rect;
-    }
-private:
-    void split();
-    mutable sf::FloatRect rect;
-    std::vector<sf::Vector2f> normals;
+    Asteroid(unsigned int size);
+    Asteroid(unsigned int size, sf::Vector2f position);
+    void setColorPalette(const ColorPalette &colorPalette);
     void update(float delta) override;
-    void calculateNormals();
-    void onDraw(sf::RenderTarget &target, const sf::Transform &transform) const
-    {
-        rect = transform.transformRect(getLocalBounds());
-        target.draw(*this, transform);
-    };
+
+    void impact(sf::Vector2f position, size_t point1, size_t point2);
+    void impact();
+    void setSize(int size) {this->size = size;}
+    bool queueDelete = false;
+private:
+    unsigned int size; 
+    // void split();
+    mutable sf::FloatRect rect;
     sf::Vector2f calculateCentroid();
+
+    // void generatePolygon();
+    // void generateValtrPolygon();
+    void circumCirclePolygon();
 };
+extern std::list<Asteroid *> *asteroidAccessor;
