@@ -21,6 +21,7 @@ Bullet::Bullet(sf::Vector2f rotation, sf::Vector2f playerPosition)
 
     this->Object2D::setRotation(toDegrees(atan(rotation.y / rotation.x)) - 90);
     this->travelRotation = rotation;
+    collidedThisFrame = false;
     bulletAccessor->push_back(this);
 }
 
@@ -43,5 +44,6 @@ void Bullet::update(float delta)
 
 void Bullet::impact()
 {
+    collidedThisFrame = true;
     queueDelete = true;
 }

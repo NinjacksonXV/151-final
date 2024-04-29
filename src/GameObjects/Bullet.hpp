@@ -17,6 +17,7 @@ public:
 
     void impact();
     bool queueDelete = false;
+    bool collidedThisFrame = false;
     
 private:
     sf::Vector2f travelRotation;
