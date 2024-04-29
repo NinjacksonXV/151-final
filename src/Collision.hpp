@@ -18,11 +18,16 @@ struct Projection
     float max;
     Projection(GameplayShape &shape, AsteroidMath::Vector2 axis)
     {
-        min = axis.dotProduct(asAMVector2(shape.getPoint(0)));
+        // std::cout << "\n\n";
+        min = axis.dotProduct(asAMVector2(shape.getTransformedPoint(0)));
+        // std::cout << axis << " dot product with " << shape.getTransformedPoint(0) << " = " << min;
         max = min;
+        // std::cout << "Starter min: " << min << '\n';
+        // std::cout << "Starter max: " << max << '\n';
+
         for (size_t i = 1; i < shape.getCollisionPointCount(); i++)
         {
-            float p = asAMVector2(shape.getPoint(i)).dotProduct(axis);
+            float p = axis.dotProduct(asAMVector2(shape.getTransformedPoint(i)));
             if (p < min)
             {
                 min = p;
@@ -32,8 +37,10 @@ struct Projection
                 max = p;
             }
         }
+        // std::cout << "End min: " << min << '\n';
+        // std::cout << "End max: " << max << '\n';
     }
-    bool overlaps(Projection projection)
+    float overlaps(Projection projection)
     {
         return std::max(0.f, std::min(this->max, projection.max) - std::max(this->min, projection.min));
     }
