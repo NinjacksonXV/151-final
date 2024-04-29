@@ -51,7 +51,7 @@ int main()
 
     Player player;
     TempStars stars;
-    std::list<GameObject *> gameObjects = {&stars, &player};
+    std::list<GameObject *> gameObjects = {&stars};
     std::list<Bullet *> bullets;
     std::list<Asteroid *> asteroids;
     bulletAccessor = &bullets;
@@ -107,9 +107,9 @@ int main()
 
     for (GameObject *gameObject : gameObjects)
     {
-        gameObject->init(); 
+        gameObject->init();
     }
-
+    player.init();
     new Asteroid(4);
 
     while (window.isOpen())
@@ -123,7 +123,7 @@ int main()
             }
             if (event.type == sf::Event::Resized)
             {
-                gameView.setSize(event.size.width, event.size.height); // Currently unused since resizing is disabled. Wouldn't work in current state.
+                gameView.setSize(event.size.width, event.size.height); // Currently unused since resizing is disabled. Wouldn't work in current state, since the gameView is set with some calculations.
             }
         }
 
@@ -167,7 +167,8 @@ int main()
                 gameObject->update(elapsed.asSeconds());
                 gameObject->draw(window);
             }
-            stars.updatePosition(player.getVelocity());
+            player.update(elapsed.asSeconds());
+            stars.updatePosition(player.getVelocity() * elapsed.asSeconds());
             for (Asteroid *asteroid : asteroids)
             {
                 asteroid->update(elapsed.asSeconds());
@@ -186,8 +187,7 @@ int main()
                 {
                     if (asteroid->getGlobalBounds().contains(bullet->Object2D::getPosition()))
                     {
-                        if (Collision::checkForCollision(bullet, asteroid))
-                            break;
+                        Collision::checkForCollision(bullet, asteroid);
                     }
                 }
             }
