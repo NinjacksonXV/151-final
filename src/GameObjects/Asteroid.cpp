@@ -27,7 +27,6 @@ Asteroid::Asteroid(unsigned int size)
 
     asteroidAccessor->push_back(this);
     circumCirclePolygon();
-    std::cout << "Got here";
     switch (side(gen))
     {
     case 1:
@@ -42,7 +41,6 @@ Asteroid::Asteroid(unsigned int size)
         Object2D::setPosition(pos(gen), windowAccessor->getView().getSize().x / -2.f - this->getLocalBounds().width / 2.f);
         break;
     }
-    std::cout << "Got here2";
 
     this->velocity = AsteroidMath::Vector2::UP;
     velocity.rotate(pos(gen));
@@ -51,7 +49,6 @@ Asteroid::Asteroid(unsigned int size)
     // this->Object2D::setOrigin(this->calculateCentroid());
     this->setColorPalette(Game::getColorPalette());
     this->setOutlineThickness(-4.0f);
-    std::cout << "Got here3";
 
 }
 
