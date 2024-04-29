@@ -15,6 +15,12 @@ public:
 
     void setColorPalette(const ColorPalette &colorPalette);
     size_t getCollisionPointCount() override { return 3; };
+    void collided(sf::Vector2f minTranslation, float magnitude);
+    void respawn();
+
+private:
+    bool dieAnimation(float delta);
+    bool deathState = false;
 };
 
 // TO-DO: Move this into its own header/compilation unit. Actually... this is never getting done. Hah.
