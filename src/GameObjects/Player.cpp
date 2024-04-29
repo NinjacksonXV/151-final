@@ -5,10 +5,15 @@
 
 float minAccelerationVelocity = 1.5f;
 
-float acceleration = 8.f;
+float acceleration = 7.f;
 float deceleration = 1.0f;
-float turnSpeed = 3.f;
 float maxSpeed = 4.f;
+
+float turnSpeed = 4.f;
+float rotationDelta;
+float knockback = 3.f;
+
+unsigned int impacts = 2;
 
 float rotationDeltaSpeedBoost = 1.5f;
 
@@ -16,6 +21,8 @@ float turnAroundSpeedBoostThreshold = -.8f;
 float turnAroundSpeedBoost = 2.f;
 float accelerationVisualCooldownLimit = .07f;
 float accelerationVisualCooldown = 0.f;
+
+float collisionGracePeriod;
 
 bool spacePressed = false;
 
@@ -43,19 +50,68 @@ void Player::setColorPalette(const ColorPalette &colorPalette)
     this->setOutlineColor(colorPalette.secondary);
 }
 
+void Player::collided(sf::Vector2f impactVector, float magnitude)
+{
+    if (deathState == true || collisionGracePeriod > 0.f)
+        return;
+    Object2D::move(impactVector * magnitude);
+    std::cout << impactVector << " * " << magnitude << '\n';
+    // return;
+    impacts--;
+    collisionGracePeriod = .1f;
+    if (impacts == 0)
+    {
+        deathState = true;
+    }
+    this->velocity += asAMVector2(impactVector) * magnitude * knockback;
+    velocity.limitLength(maxSpeed);
+}
+
+/**
+ * @brief Plays animation for dying, returns true when finished
+ *
+ * @param delta Delta time
+ * @return true
+ * @return false
+ */
+bool Player::dieAnimation(float delta)
+{
+    if (rotationDelta == 0)
+        rotationDelta = sign(Object2D::getPosition().x) * turnSpeed;
+    if (!((Object2D::getPosition().y > windowAccessor->getView().getSize().y / 2.0f + getGlobalBounds().height / 2.f || Object2D::getPosition().y < windowAccessor->getView().getSize().y / -2.0f - getGlobalBounds().height / 2.f) || (Object2D::getPosition().x > windowAccessor->getView().getSize().x / 2.f + getGlobalBounds().width / 2.f || Object2D::getPosition().x < windowAccessor->getView().getSize().x / -2.0f - getGlobalBounds().width / 2.f)))
+    {
+        velocity.limitLength(maxSpeed);
+        Object2D::move(velocity * 1.4f);
+        Object2D::rotate(toDegrees(delta * rotationDelta * 2.f));
+        return false;
+    }
+    else
+        return true;
+}
+
+
+
 void Player::update(float delta)
 {
+    if (deathState == true)
+    {
+        dieAnimation(delta);
+        return;
+    }
+    rotationDelta = 0;
+    collisionGracePeriod -= delta;
+
     float rotationDelta = 0.f;
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
     {
-        rotationDelta += turnSpeed * delta;
+        rotationDelta += turnSpeed;
     }
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
     {
-        rotationDelta -= turnSpeed * delta;
+        rotationDelta -= turnSpeed;
     }
-    Object2D::rotate(toDegrees(rotationDelta));
-    direction.rotate(rotationDelta);
+    Object2D::rotate(toDegrees(rotationDelta * delta));
+    direction.rotate(rotationDelta * delta);
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
     {
