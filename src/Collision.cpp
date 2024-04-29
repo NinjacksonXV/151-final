@@ -48,9 +48,10 @@ bool Collision::checkForCollision(Bullet *bullet, Asteroid *asteroid)
         // new Indicator(asteroid->getPoint(entryPt2));
         // new Indicator(bullet->Object2D::getPosition());
 
+        if (bullet->collidedThisFrame == false)
+            asteroid->impact();
         bullet->impact();
         // asteroid->impact(bullet->Object2D::getPosition(), entryPt1, entryPt2);
-        asteroid->impact();
     }
     return isInside;
 }
