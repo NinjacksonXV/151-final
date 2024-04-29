@@ -60,7 +60,7 @@ void Collision::checkForCollision(Player *player, Asteroid *asteroid)
     std::vector<sf::Vector2f> playerAxes = player->getAxes();
     std::vector<sf::Vector2f> asteroidAxes = asteroid->getAxes();
 
-    float overlap;
+    float overlap = 9999999;
     sf::Vector2f smallest;
     float tempOverlap;
 
@@ -80,21 +80,19 @@ void Collision::checkForCollision(Player *player, Asteroid *asteroid)
             isColliding = false;
             return;
         }
-        else
+        else if (tempOverlap < overlap)
         {
             overlap = tempOverlap;
             smallest = axis;
         }
     }
 
-    if (!isColliding)
-        return;
     for (size_t i = 0; i < asteroidAxes.size(); i++)
     {
         sf::Vector2f axis = asteroidAxes[i];
         Projection p1(*player, asAMVector2(axis));
         Projection p2(*asteroid, asAMVector2(axis));
-        
+
         tempOverlap = p1.overlaps(p2);
 
         if (tempOverlap == 0.f)
@@ -102,7 +100,7 @@ void Collision::checkForCollision(Player *player, Asteroid *asteroid)
             isColliding = false;
             return;
         }
-        else
+        else if (tempOverlap < overlap)
         {
             overlap = tempOverlap;
             smallest = axis;
@@ -110,11 +108,10 @@ void Collision::checkForCollision(Player *player, Asteroid *asteroid)
     }
     if (isColliding)
     {
-        std::cout << "IS COLLIDING \n";
-        std::cout << overlap << " " << smallest << '\n';
+        // std::cout << "IS COLLIDING \n";
+        // std::cout << overlap << " " << smallest << '\n';
 
-        AsteroidMath::Vector2 mtv = asAMVector2(smallest).normalized();
-        player->Object2D::move(mtv * overlap);
+        player->collided(smallest, overlap);
     }
 }
 
