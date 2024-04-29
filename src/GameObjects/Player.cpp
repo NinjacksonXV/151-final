@@ -7,11 +7,11 @@ float minAccelerationVelocity = 1.5f;
 
 float acceleration = 7.f;
 float deceleration = 1.0f;
-float maxSpeed = 4.f;
+float maxSpeed = 570.f;
 
 float turnSpeed = 4.f;
 float rotationDelta;
-float knockback = 3.f;
+float knockback = 1300.f;
 
 unsigned int impacts = 2;
 
@@ -27,6 +27,8 @@ float collisionGracePeriod;
 bool spacePressed = false;
 
 AsteroidMath::Vector2 direction;
+
+int deathSpinDirection = 1;
 
 void Player::init()
 {
@@ -55,16 +57,17 @@ void Player::collided(sf::Vector2f impactVector, float magnitude)
     if (deathState == true || collisionGracePeriod > 0.f)
         return;
     Object2D::move(impactVector * magnitude);
-    std::cout << impactVector << " * " << magnitude << '\n';
-    // return;
     impacts--;
-    collisionGracePeriod = .1f;
+    collisionGracePeriod = .2f;
+    this->velocity += asAMVector2(impactVector) * knockback;
     if (impacts == 0)
     {
         deathState = true;
+        deathSpinDirection = sign(impactVector.x);
+        velocity = velocity.limitLength(maxSpeed);
+        std::cout << velocity.getLength();
     }
-    this->velocity += asAMVector2(impactVector) * magnitude * knockback;
-    velocity.limitLength(maxSpeed);
+    std::cout << "Velocity: " << velocity << '\n';
 }
 
 /**
@@ -77,19 +80,16 @@ void Player::collided(sf::Vector2f impactVector, float magnitude)
 bool Player::dieAnimation(float delta)
 {
     if (rotationDelta == 0)
-        rotationDelta = sign(Object2D::getPosition().x) * turnSpeed;
+        rotationDelta = deathSpinDirection * turnSpeed;
     if (!((Object2D::getPosition().y > windowAccessor->getView().getSize().y / 2.0f + getGlobalBounds().height / 2.f || Object2D::getPosition().y < windowAccessor->getView().getSize().y / -2.0f - getGlobalBounds().height / 2.f) || (Object2D::getPosition().x > windowAccessor->getView().getSize().x / 2.f + getGlobalBounds().width / 2.f || Object2D::getPosition().x < windowAccessor->getView().getSize().x / -2.0f - getGlobalBounds().width / 2.f)))
     {
-        velocity.limitLength(maxSpeed);
-        Object2D::move(velocity * 1.4f);
+        Object2D::move(velocity * delta);
         Object2D::rotate(toDegrees(delta * rotationDelta * 2.f));
         return false;
     }
     else
         return true;
 }
-
-
 
 void Player::update(float delta)
 {
@@ -98,10 +98,9 @@ void Player::update(float delta)
         dieAnimation(delta);
         return;
     }
-    rotationDelta = 0;
+    rotationDelta = 0.f;
     collisionGracePeriod -= delta;
 
-    float rotationDelta = 0.f;
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
     {
         rotationDelta += turnSpeed;
@@ -115,7 +114,7 @@ void Player::update(float delta)
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
     {
-        velocity += direction * delta * acceleration;
+        velocity += direction * acceleration;
         if (accelerationVisualCooldown <= 0)
         {
             sf::Vector2f temp((direction * 15).getX(), (direction * 15).getY());
@@ -125,7 +124,7 @@ void Player::update(float delta)
     }
     else
     {
-        velocity -= velocity * delta * deceleration;
+        velocity -= velocity * deceleration;
     }
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
     {
@@ -141,8 +140,7 @@ void Player::update(float delta)
     }
     accelerationVisualCooldown -= delta;
     velocity = velocity.limitLength(maxSpeed);
-
-    Object2D::move(velocity);
+    Object2D::move(velocity * delta);
 
     // Screen wrapping
     if (Object2D::getPosition().x > windowAccessor->getView().getSize().x / 2.f + getGlobalBounds().width / 2.f || Object2D::getPosition().x < windowAccessor->getView().getSize().x / -2.0f - getGlobalBounds().width / 2.f)
