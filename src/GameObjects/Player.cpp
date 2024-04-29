@@ -5,17 +5,17 @@
 
 float minAccelerationVelocity = 1.5f;
 
-float acceleration = 7.f;
+float acceleration = 17.f;
 float deceleration = 1.0f;
 float maxSpeed = 570.f;
 
-float turnSpeed = 4.f;
+float turnSpeed = 4.5f;
 float rotationDelta;
 float knockback = 1300.f;
 
 unsigned int impacts = 2;
 
-float rotationDeltaSpeedBoost = 1.5f;
+float rotationDeltaSpeedBoost = 1.8f;
 
 float turnAroundSpeedBoostThreshold = -.8f;
 float turnAroundSpeedBoost = 2.f;
@@ -56,6 +56,7 @@ void Player::collided(sf::Vector2f impactVector, float magnitude)
 {
     if (deathState == true || collisionGracePeriod > 0.f)
         return;
+    std::cout << impactVector << " " << magnitude << '\n';
     Object2D::move(impactVector * magnitude);
     impacts--;
     collisionGracePeriod = .2f;
@@ -65,9 +66,8 @@ void Player::collided(sf::Vector2f impactVector, float magnitude)
         deathState = true;
         deathSpinDirection = sign(impactVector.x);
         velocity = velocity.limitLength(maxSpeed);
-        std::cout << velocity.getLength();
     }
-    std::cout << "Velocity: " << velocity << '\n';
+    // std::cout << "Velocity: " << velocity << '\n';
 }
 
 /**
@@ -93,8 +93,17 @@ bool Player::dieAnimation(float delta)
 
 void Player::update(float delta)
 {
+    accelerationVisualCooldown -= delta;
+
     if (deathState == true)
     {
+        if (accelerationVisualCooldown <= 0)
+        {
+            AsteroidMath::Vector2 tempRotation(cos(Object2D::getRotation() * M_PI / 180), sin(Object2D::getRotation() * M_PI / 180));
+            sf::Vector2f temp((tempRotation * 15).getX(), (tempRotation * 15).getY());
+            new AccelerationLine(this->Object2D::getPosition() - temp, tempRotation);
+            accelerationVisualCooldown = accelerationVisualCooldownLimit;
+        }
         dieAnimation(delta);
         return;
     }
@@ -114,7 +123,7 @@ void Player::update(float delta)
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
     {
-        velocity += direction * acceleration;
+        velocity += direction * acceleration * (rotationDelta != 0.f ? rotationDeltaSpeedBoost : 1.f);
         if (accelerationVisualCooldown <= 0)
         {
             sf::Vector2f temp((direction * 15).getX(), (direction * 15).getY());
@@ -124,7 +133,7 @@ void Player::update(float delta)
     }
     else
     {
-        velocity -= velocity * deceleration;
+        velocity -= velocity * deceleration * delta;
     }
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
     {
@@ -138,7 +147,6 @@ void Player::update(float delta)
     {
         spacePressed = false;
     }
-    accelerationVisualCooldown -= delta;
     velocity = velocity.limitLength(maxSpeed);
     Object2D::move(velocity * delta);
 
