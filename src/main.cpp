@@ -10,16 +10,22 @@
 #include "Icon.cpp"
 #include "GameObjects/Asteroid.hpp"
 #include "Collision.hpp"
+#include "ColorShader.hpp"
 
-// #include "MusicHandler.hpp"
-
-enum GameState
+enum class GameState
 {
     Menu = 1,
     Paused = 2,
-    Playing = 3,
-    GameOver = 4
+    NewRound = 4,
+    Playing = 8,
+    GameOver = 16
 };
+
+unsigned int lives = 3;
+
+bool isFullScreen;
+
+std::list<Colorable *> Colorable::colorables;
 
 sf::RenderTarget const *windowAccessor; // Make this a public static accessor of Game class later
 sf::View const *gameViewAccessor;
@@ -30,24 +36,12 @@ std::list<GameObject *> *gameObjectAccessor;
 int asteroidLimit = 15;
 float asteroidSpawnCooldown = 5.f;
 
-const std::string colorShaderStr =
-    "uniform sampler2D texture;"
-    "uniform vec4 primary;"
-    "uniform vec4 secondary;"
-    "uniform vec4 tertiary;"
-    ""
-    "void main(){"
-    "vec4 color = gl_Color * texture2D(texture, gl_TexCoord[0].st);"
-    "vec3 color1 = vec3(color.r * primary.r, color.r * primary.g, color.r * primary.b);"
-    "vec3 color2 = vec3(color.g * secondary.r, color.g * secondary.g, color.g * secondary.b);"
-    "vec3 color3 = vec3(color.b * tertiary.r, color.b * tertiary.g, color.b * tertiary.b);"
-    "gl_FragColor = vec4(color1 + color2 + color3, 1.0);"
-    "}";
-
 // TO-DO: Move most of this logic to Game class
 int main()
 {
+    GameState gameState = GameState::Playing;
     Game::setColorPalette(ColorPalette::basic);
+    isFullScreen = false;
     auto window = sf::RenderWindow{{1920u, 1080u}, "Asteroids", sf::Style::Titlebar | sf::Style::Close}; // This is nice to avoid resizing issues
 
     window.setIcon(icon.width, icon.height, icon.pixel_data);
@@ -57,13 +51,14 @@ int main()
 
     Player player;
     TempStars stars;
-    // Asteroid asteroid({{0.f, 0.f},{25.f, 0.f},{54.f, 30.f},{36.f, 45.f},{-10.f, 70.f},{-20.f, 35.f},{-25.f, 10.f}}, {0.f, 0.f});
     std::list<GameObject *> gameObjects = {&stars, &player};
     std::list<Bullet *> bullets;
     std::list<Asteroid *> asteroids;
     bulletAccessor = &bullets;
     asteroidAccessor = &asteroids;
     gameObjectAccessor = &gameObjects;
+
+    ColorShader colorShader;
 
     sf::View gameView({0.f, 0.f}, sf::Vector2f(window.getSize().y, window.getSize().y));
     gameView.setViewport(sf::FloatRect((static_cast<float>(window.getSize().x) - static_cast<float>(window.getSize().y)) / 2.f / static_cast<float>(window.getSize().x), 0.f,
@@ -72,14 +67,6 @@ int main()
 
     gameViewAccessor = &gameView;
     sf::Clock clock;
-
-    sf::Shader colorShader;
-    colorShader.loadFromMemory(colorShaderStr, sf::Shader::Fragment);
-    colorShader.setUniform("texture", sf::Shader::CurrentTexture);
-
-    colorShader.setUniform("primary", sf::Glsl::Vec4(Game::getColorPalette().primary));
-    colorShader.setUniform("secondary", sf::Glsl::Vec4(Game::getColorPalette().secondary));
-    colorShader.setUniform("tertiary", sf::Glsl::Vec4(Game::getColorPalette().tertiary));
 
     sf::Texture door1Texture;
     door1Texture.loadFromFile("../../asset-source/door1.png");
@@ -120,8 +107,10 @@ int main()
 
     for (GameObject *gameObject : gameObjects)
     {
-        gameObject->init();
+        gameObject->init(); 
     }
+
+    new Asteroid(4);
 
     while (window.isOpen())
     {
@@ -140,67 +129,84 @@ int main()
 
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::LAlt) && sf::Keyboard::isKeyPressed(sf::Keyboard::Enter))
         {
-            window.create({1920, 1080}, "Asteroids", sf::Style::Fullscreen);
+            window.create({1920, 1080}, "Asteroids", (isFullScreen ? sf::Style::Titlebar | sf::Style::Close : sf::Style::Fullscreen));
+            isFullScreen = true;
+            window.setVerticalSyncEnabled(true);
             window.setFramerateLimit(144);
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::O))
         {
             Game::setColorPalette(ColorPalette::bumblebit);
-            player.setColorPalette(Game::getColorPalette());
-            colorShader.setUniform("primary", sf::Glsl::Vec4(Game::getColorPalette().primary));
-            colorShader.setUniform("secondary", sf::Glsl::Vec4(Game::getColorPalette().secondary));
-            colorShader.setUniform("tertiary", sf::Glsl::Vec4(Game::getColorPalette().tertiary));
-
-            // musicHandler.queueUp(musicFile2);
+            Colorable::updateColorPalette(Game::getColorPalette());
         }
 
         window.clear();
-        window.setView(gameView);
 
-        asteroids.remove_if([](Asteroid *asteroid)
-                            { return asteroid->queueDelete; });
-
-        gameObjects.remove_if([](GameObject *gameObject)
-                              { return gameObject->queueDelete; });
-
-        for (GameObject *gameObject : gameObjects)
+        switch (gameState)
         {
-            gameObject->update(elapsed.asSeconds());
-            gameObject->draw(window);
+        case GameState::Menu:
+        {
+            break;
         }
-        for (Asteroid *asteroid : asteroids)
+        case GameState::NewRound:
         {
-            asteroid->update(elapsed.asSeconds());
-            asteroid->draw(window);
-            if (asteroid->getGlobalBounds().intersects(player.getGlobalBounds()))
+            break;
+        }
+        case GameState::Playing:
+        {
+            window.setView(gameView);
+
+            asteroids.remove_if([](Asteroid *asteroid)
+                                { return asteroid->queueDelete; });
+
+            gameObjects.remove_if([](GameObject *gameObject)
+                                  { return gameObject->queueDelete; });
+
+            for (GameObject *gameObject : gameObjects)
             {
-                Collision::checkForCollision(&player, asteroid);
+                gameObject->update(elapsed.asSeconds());
+                gameObject->draw(window);
             }
-        }
-        stars.updatePosition(player.getVelocity());
-
-        for (Bullet *bullet : bullets)
-        {
-            bullet->update(elapsed.asSeconds());
-            bullet->Object2D::draw(window);
+            stars.updatePosition(player.getVelocity());
             for (Asteroid *asteroid : asteroids)
             {
-                if (asteroid->getGlobalBounds().contains(bullet->Object2D::getPosition()))
+                asteroid->update(elapsed.asSeconds());
+                asteroid->draw(window);
+                if (asteroid->getGlobalBounds().intersects(player.getGlobalBounds()))
                 {
-                    if (Collision::checkForCollision(bullet, asteroid))
-                        break;
+                    Collision::checkForCollision(&player, asteroid);
                 }
             }
-        }
-        bullets.remove_if([](Bullet *bullet)
-                          { return bullet->queueDelete; });
 
-        if (asteroids.size() < asteroidLimit && asteroidSpawnCooldown < 0.f)
-        {
-            new Asteroid(4);
-            asteroidSpawnCooldown = 5.f;
+            for (Bullet *bullet : bullets)
+            {
+                bullet->update(elapsed.asSeconds());
+                bullet->Object2D::draw(window);
+                for (Asteroid *asteroid : asteroids)
+                {
+                    if (asteroid->getGlobalBounds().contains(bullet->Object2D::getPosition()))
+                    {
+                        if (Collision::checkForCollision(bullet, asteroid))
+                            break;
+                    }
+                }
+            }
+            bullets.remove_if([](Bullet *bullet)
+                              { return bullet->queueDelete; });
+            player.draw(window);
+
+            // if (asteroids.size() < asteroidLimit && asteroidSpawnCooldown < 0.f)
+            // {
+            //     new Asteroid(4);
+            //     asteroidSpawnCooldown = 5.f;
+            // }
+            // asteroidSpawnCooldown -= elapsed.asSeconds();
         }
-        asteroidSpawnCooldown -= elapsed.asSeconds();
+        case GameState::Paused:
+            break;
+        case GameState::GameOver:
+            break;
+        }
 
         window.setView(window.getDefaultView());
         window.draw(door1_l, &colorShader);
@@ -208,30 +214,3 @@ int main()
         window.display();
     }
 }
-
-const std::string shapeFragShader =
-    "#version 130\n"
-    "uniform float radius;"
-    "uniform vec2 u_resolution;"
-    "uniform vec2 position;"
-    "uniform sampler2D image;"
-    ""
-    "vec4 blur13(sampler2D image, vec2 uv, vec2 resolution, vec2 direction) {"
-    "   vec4 color = vec4(0.0);"
-    "   vec2 off1 = vec2(1.411764705882353) * direction;"
-    "   vec2 off2 = vec2(3.2941176470588234) * direction;"
-    "   vec2 off3 = vec2(5.176470588235294) * direction;"
-    "   color += texture2D(image, uv) * 0.1964825501511404;"
-    "   color += texture2D(image, uv + (off1 / resolution)) * 0.2969069646728344;"
-    "   color += texture2D(image, uv - (off1 / resolution)) * 0.2969069646728344;"
-    "   color += texture2D(image, uv + (off2 / resolution)) * 0.09447039785044732;"
-    "   color += texture2D(image, uv - (off2 / resolution)) * 0.09447039785044732;"
-    "   color += texture2D(image, uv + (off3 / resolution)) * 0.010381362401148057;"
-    "   color += texture2D(image, uv - (off3 / resolution)) * 0.010381362401148057;"
-    "   return color;"
-    "}"
-    ""
-    "void main() {"
-    "vec2 uv = vec2(gl_FragCoord.xy / u_resolution);"
-    "gl_FragColor = blur13(image, uv, u_resolution, vec2(.5,.2));"
-    "}";
