@@ -148,7 +148,7 @@ sf::Vector2f Asteroid::calculateCentroid()
         x1 = getPoint(i + 1).x;
         y1 = getPoint(i + 1).y;
         a = x0 * y1 - x1 * y0;
-        signedArea == a;
+        signedArea = a;
         centroid.x += (x0 + x1) * a;
         centroid.y += (y0 + y1) * a;
     }
