@@ -4,6 +4,7 @@ float decaySpeed = 40.f;
 
 AccelerationLine::AccelerationLine(sf::Vector2f position, sf::Vector2f rotation)
 {
+    setColorPalette(Game::getColorPalette());
     this->Object2D::setPosition(position);
     this->setPointCount(4);
     this->setPoint(0, {-20, 2});
