@@ -4,14 +4,14 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
-SizeVals& SizeVals::getSize(unsigned int size)
+SizeVals &SizeVals::getSize(unsigned int size)
 {
     static SizeVals sizes[] =
         {
-            SizeVals(1, 5.f, 10.f, .7f, 5, 8, 30, 40), // Size 1
-            SizeVals(2, 4.f, 8.f, 9, 12, .7f, 50, 70), //Size 2
-            SizeVals(3, 4.f, 6.f, 13, 15, .7f, 80, 110), //Size 3
-            SizeVals(4, 2.f, 4.f, 16, 22, 3.f, 130, 160), // Size 4
+            SizeVals(1, 5.f, 10.f, .7f, 5, 8, 30, 40),    // Size 1
+            SizeVals(2, 4.f, 8.f, .7f, 9, 12, 50, 70),    // Size 2
+            SizeVals(3, 4.f, 6.f, .7f, 13, 15, 80, 110),  // Size 3
+            SizeVals(4, 2.f, 4.f, 3.f, 16, 22, 130, 160), // Size 4
         };
 
     if (size > sizeof(sizes) / sizeof(SizeVals))
@@ -20,10 +20,9 @@ SizeVals& SizeVals::getSize(unsigned int size)
         throw std::runtime_error("Wrong size");
     }
     return sizes[size - 1];
-
 }
 
-Asteroid::Asteroid(unsigned int size) : size(SizeVals::getSize(size))
+Asteroid::Asteroid(unsigned int size) : size(SizeVals::getSize(size)), hasNotBeenOnScreen(true)
 {
     std::random_device rd;
     std::mt19937 gen(rd());
@@ -78,9 +77,20 @@ void Asteroid::setColorPalette(const ColorPalette &colorPalette)
     this->setOutlineColor(colorPalette.secondary);
 }
 
+bool Asteroid::checkIfHasNotBeenOnScreen()
+{
+    if (abs(this->Object2D::getPosition().x) > windowAccessor->getView().getSize().x / 2.f || abs(this->Object2D::getPosition().y) > windowAccessor->getView().getSize().y)
+        hasNotBeenOnScreen = false;
+    return hasNotBeenOnScreen;
+}
+
 void Asteroid::update(float delta)
 {
     Object2D::move(velocity * delta * 10.f);
+
+    if (checkIfHasNotBeenOnScreen())
+        return;
+
     if (Object2D::getPosition().x > windowAccessor->getView().getSize().x / 2.f + getGlobalBounds().width / 2.f || Object2D::getPosition().x < windowAccessor->getView().getSize().x / -2.0f - getGlobalBounds().width / 2.f)
     {
         Object2D::setPosition(-1 * sign(this->Object2D::getPosition().x) * (windowAccessor->getView().getSize().x / 2.f + getGlobalBounds().width / 2.f), Object2D::getPosition().y);
@@ -102,6 +112,7 @@ void Asteroid::impact(sf::Vector2f position, size_t point1, size_t point2)
 {
     queueDelete = true;
 }
+
 void Asteroid::impact()
 {
     if (this->size.size > 1)
@@ -111,24 +122,6 @@ void Asteroid::impact()
     }
     queueDelete = true;
 }
-
-// void Asteroid::calculateNormals()
-// {
-//     if (this->normals.capacity() != this->getPointCount())
-//     {
-//         this->normals.resize(this->getPointCount());
-//     }
-//     for (size_t i = 0; i < this->getPointCount(); i++)
-//     {
-//         sf::Vector2f p1 = this->getPoint(i); // I need a toGlobal() function for this and the one following.
-//         sf::Vector2f p2 = this->getPoint(i + 1 == this->getPointCount() ? 0 : i + 1);
-
-//         sf::Vector2f edge = p1 - p2;
-//         AsteroidMath::Vector2 normal = {edge.y * -1, edge.x};
-//         normal.normalize();
-//         this->normals[i] = normal;
-//     }
-// }
 
 /**
  * @brief Calculates the centroid of the polygon. Currently not functional...
@@ -183,15 +176,20 @@ void Asteroid::circumCirclePolygon()
 
     std::random_device rd;
     std::mt19937 gen(rd());
+
+    std::cout << size.minPointCount << " - " << size.maxPointCount << '\n';
+
     std::uniform_int_distribution<int> pointCount(size.minPointCount, size.maxPointCount);
     std::uniform_real_distribution<float> angles(0.0f, 1.0f);
+    std::uniform_real_distribution<float> radii(size.minRadius, size.maxRadius);
 
-    float radius = size * 40; // CHANGE THIS
-
+    std::cout << "Got here";
     size_t n = pointCount(gen);
+    std::cout << n;
     this->setPointCount(n);
-
+    std::cout << "Got here1";
     std::vector<float> vertAngles;
+    std::cout << "Got here2";
     for (size_t i = 0; i < n; i++)
     {
         float angle = angles(gen) * M_PI * 2.f;
@@ -215,6 +213,7 @@ void Asteroid::circumCirclePolygon()
     }
     std::sort(vertAngles.begin(), vertAngles.end()); // Check back to see if this needs this sorting algorithm: [](float a, float b){ return a - b;}
 
+    float radius = radii(gen);
     for (size_t i = 0; i < n; i++)
     {
         this->setPoint(i, {radius * cos(vertAngles[i]), radius * sin(vertAngles[i])});

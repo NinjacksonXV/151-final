@@ -43,5 +43,7 @@ private:
     // void generatePolygon();
     // void generateValtrPolygon();
     void circumCirclePolygon();
+    bool checkIfHasNotBeenOnScreen();
+    bool hasNotBeenOnScreen;
 };
 extern std::list<Asteroid *> *asteroidAccessor;
