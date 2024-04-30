@@ -4,25 +4,31 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
-Asteroid::Asteroid(std::vector<sf::Vector2f> points, sf::Vector2f position)
+SizeVals& SizeVals::getSize(unsigned int size)
 {
-    this->setPointCount(points.size());
-    for (size_t i = 0; i < points.size(); i++)
+    static SizeVals sizes[] =
+        {
+            SizeVals(1, 5.f, 10.f, .7f, 5, 8, 30, 40), // Size 1
+            SizeVals(2, 4.f, 8.f, 9, 12, .7f, 50, 70), //Size 2
+            SizeVals(3, 4.f, 6.f, 13, 15, .7f, 80, 110), //Size 3
+            SizeVals(4, 2.f, 4.f, 16, 22, 3.f, 130, 160), // Size 4
+        };
+
+    if (size > sizeof(sizes) / sizeof(SizeVals))
     {
-        setPoint(i, points[i]);
+
+        throw std::runtime_error("Wrong size");
     }
-    this->Object2D::setPosition(position);
-    this->setColorPalette(Game::getColorPalette());
-    this->setOutlineThickness(-4.0f);
+    return sizes[size - 1];
+
 }
 
-Asteroid::Asteroid(unsigned int size)
+Asteroid::Asteroid(unsigned int size) : size(SizeVals::getSize(size))
 {
-    this->size = size;
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_real_distribution<float> pos(windowAccessor->getView().getSize().x / -2.f, windowAccessor->getView().getSize().x / 2.f);
-    std::uniform_real_distribution<float> speed(3.f, 35.f);
+    std::uniform_real_distribution<float> speed(this->size.minSpeed, this->size.maxSpeed);
     std::uniform_int_distribution<> side(1, 4);
 
     asteroidAccessor->push_back(this);
@@ -49,16 +55,14 @@ Asteroid::Asteroid(unsigned int size)
     // this->Object2D::setOrigin(this->calculateCentroid());
     this->setColorPalette(Game::getColorPalette());
     this->setOutlineThickness(-4.0f);
-
 }
 
-Asteroid::Asteroid(unsigned int size, sf::Vector2f position)
+Asteroid::Asteroid(unsigned int size, sf::Vector2f position) : size(SizeVals::getSize(size))
 {
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_real_distribution<float> angles(0, M_PI * 2.f);
 
-    this->size = size;
     circumCirclePolygon();
     this->Object2D::setPosition(position);
     // this->Object2D::setOrigin(this->calculateCentroid());
@@ -100,10 +104,10 @@ void Asteroid::impact(sf::Vector2f position, size_t point1, size_t point2)
 }
 void Asteroid::impact()
 {
-    if (this->size > 1)
+    if (this->size.size > 1)
     {
-        new Asteroid(size - 1, this->Object2D::getPosition());
-        new Asteroid(size - 1, this->Object2D::getPosition());
+        new Asteroid(size.size - 1, this->Object2D::getPosition());
+        new Asteroid(size.size - 1, this->Object2D::getPosition());
     }
     queueDelete = true;
 }
@@ -179,10 +183,10 @@ void Asteroid::circumCirclePolygon()
 
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::uniform_int_distribution<int> pointCount(4 + size, 5 * size);
+    std::uniform_int_distribution<int> pointCount(size.minPointCount, size.maxPointCount);
     std::uniform_real_distribution<float> angles(0.0f, 1.0f);
 
-    float radius = size * 40;
+    float radius = size * 40; // CHANGE THIS
 
     size_t n = pointCount(gen);
     this->setPointCount(n);

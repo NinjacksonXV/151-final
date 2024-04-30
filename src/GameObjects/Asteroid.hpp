@@ -5,6 +5,22 @@
 
 extern sf::RenderTarget const *windowAccessor;
 
+struct SizeVals
+{
+    SizeVals(unsigned int size, float minSpeed, float maxSpeed, float maxRotationSpeed, unsigned int minPointCount, unsigned int maxPointCount, unsigned int minRadius, unsigned int maxRadius)
+        : size(size), minSpeed(minSpeed), maxSpeed(maxSpeed), maxRotationSpeed(maxRotationSpeed), minPointCount(minPointCount), maxPointCount(maxPointCount), minRadius(minRadius), maxRadius(maxRadius){};
+    unsigned int size;
+    float maxSpeed;
+    float minSpeed;
+    float maxRotationSpeed;
+    unsigned int minPointCount;
+    unsigned int maxPointCount;
+    unsigned int minRadius;
+    unsigned int maxRadius;
+
+    static SizeVals& getSize(unsigned int size);
+};
+
 class Asteroid : public GameplayShape
 {
 public:
@@ -16,10 +32,10 @@ public:
 
     void impact(sf::Vector2f position, size_t point1, size_t point2);
     void impact();
-    void setSize(int size) {this->size = size;}
     bool queueDelete = false;
+
 private:
-    unsigned int size; 
+    SizeVals size;
     // void split();
     mutable sf::FloatRect rect;
     sf::Vector2f calculateCentroid();
