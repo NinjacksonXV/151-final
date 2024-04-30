@@ -110,7 +110,9 @@ int main()
         gameObject->init();
     }
     player.init();
-    new Asteroid(4);
+    Asteroid* asteroid = new Asteroid(4);
+    asteroid->setVelocity(AsteroidMath::Vector2::ZERO);
+    asteroid->Object2D::setPosition({-300,-300});
 
     while (window.isOpen())
     {
@@ -213,4 +215,5 @@ int main()
         window.draw(door1_r, &colorShader);
         window.display();
     }
+    // main(); // Hell yeah
 }
