@@ -4,71 +4,77 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
-Asteroid::Asteroid(std::vector<sf::Vector2f> points, sf::Vector2f position)
+unsigned int Asteroid::points;
+
+SizeVals &SizeVals::getSize(unsigned int size)
 {
-    this->setPointCount(points.size());
-    for (size_t i = 0; i < points.size(); i++)
+    static SizeVals sizes[] =
+        {
+            SizeVals(1, 20, 7.f, 35.f, .7f, 5, 8, 30, 40),    // Size 1
+            SizeVals(2, 15, 4.f, 20.f, .7f, 9, 12, 50, 70),   // Size 2
+            SizeVals(3, 10, 4.f, 15.f, .7f, 13, 15, 80, 110), // Size 3
+            SizeVals(4, 5, 4.f, 8.f, 3.f, 16, 22, 130, 160),  // Size 4
+        };
+
+    if (size > sizeof(sizes) / sizeof(SizeVals))
     {
-        setPoint(i, points[i]);
+        throw std::runtime_error("Wrong size");
     }
-    this->Object2D::setPosition(position);
-    this->setColorPalette(Game::getColorPalette());
-    this->setOutlineThickness(-4.0f);
+    return sizes[size - 1];
 }
 
-Asteroid::Asteroid(unsigned int size)
+Asteroid::Asteroid(unsigned int size) : size(SizeVals::getSize(size)), hasNotBeenOnScreen(true)
 {
-    this->size = size;
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::uniform_real_distribution<float> pos(windowAccessor->getView().getSize().x / -2.f, windowAccessor->getView().getSize().x / 2.f);
-    std::uniform_real_distribution<float> speed(3.f, 35.f);
+    std::uniform_real_distribution<float> pos(
+        (gameViewAccessor->getSize().x / -2.f) + 100.f,
+        (gameViewAccessor->getSize().x / 2.f) - 100.f);
+    std::uniform_real_distribution<float> speed(this->size.minSpeed, this->size.maxSpeed);
+    std::uniform_real_distribution<float> rot(M_PI / -3.f, M_PI / 3.f);
     std::uniform_int_distribution<> side(1, 4);
 
     asteroidAccessor->push_back(this);
     circumCirclePolygon();
-    std::cout << "Got here";
     switch (side(gen))
     {
     case 1:
-        Object2D::setPosition(windowAccessor->getView().getSize().x / 2.f + this->getLocalBounds().height / 2.f, pos(gen));
+        Object2D::setPosition((gameViewAccessor->getSize().x / 2.f) + this->getLocalBounds().width, pos(gen));
+        this->velocity = AsteroidMath::Vector2::LEFT;
         break;
     case 2:
-        Object2D::setPosition(windowAccessor->getView().getSize().x / -2.f - this->getLocalBounds().height / 2.f, pos(gen));
+        Object2D::setPosition(gameViewAccessor->getSize().x / -2.f - this->getLocalBounds().width, pos(gen));
+        this->velocity = AsteroidMath::Vector2::RIGHT;
+        break;
     case 3:
-        Object2D::setPosition(pos(gen), windowAccessor->getView().getSize().x / 2.f + this->getLocalBounds().width / 2.f);
+        Object2D::setPosition(pos(gen), gameViewAccessor->getSize().x / 2.f + this->getLocalBounds().height);
+        this->velocity = AsteroidMath::Vector2::UP;
         break;
     case 4:
-        Object2D::setPosition(pos(gen), windowAccessor->getView().getSize().x / -2.f - this->getLocalBounds().width / 2.f);
+        Object2D::setPosition(pos(gen), gameViewAccessor->getSize().x / -2.f - this->getLocalBounds().height);
+        this->velocity = AsteroidMath::Vector2::DOWN;
         break;
     }
-    std::cout << "Got here2";
 
-    this->velocity = AsteroidMath::Vector2::UP;
-    velocity.rotate(pos(gen));
+    velocity.rotate(rot(gen));
     velocity *= speed(gen);
-    // calculateCentroid();
-    // this->Object2D::setOrigin(this->calculateCentroid());
     this->setColorPalette(Game::getColorPalette());
     this->setOutlineThickness(-4.0f);
-    std::cout << "Got here3";
-
 }
 
-Asteroid::Asteroid(unsigned int size, sf::Vector2f position)
+Asteroid::Asteroid(unsigned int size, sf::Vector2f position, sf::Vector2f direction) : size(SizeVals::getSize(size))
 {
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::uniform_real_distribution<float> angles(0, M_PI * 2.f);
+    std::uniform_real_distribution<float> speed(this->size.minSpeed, this->size.maxSpeed);
 
-    this->size = size;
+    float generatedSpeed = speed(gen);
     circumCirclePolygon();
     this->Object2D::setPosition(position);
-    // this->Object2D::setOrigin(this->calculateCentroid());
+    this->velocity = asAMVector2(direction) * generatedSpeed;
     this->setColorPalette(Game::getColorPalette());
     this->setOutlineThickness(-4.0f);
     asteroidAccessor->push_back(this);
-    this->velocity = AsteroidMath::Vector2(angles(gen), angles(gen)) * angles(gen);
 }
 
 void Asteroid::setColorPalette(const ColorPalette &colorPalette)
@@ -77,16 +83,27 @@ void Asteroid::setColorPalette(const ColorPalette &colorPalette)
     this->setOutlineColor(colorPalette.secondary);
 }
 
+bool Asteroid::checkIfHasNotBeenOnScreen()
+{
+    if (abs(this->Object2D::getPosition().x) > gameViewAccessor->getSize().x / 2.f && abs(this->Object2D::getPosition().y) > gameViewAccessor->getSize().y)
+        hasNotBeenOnScreen = false;
+    return hasNotBeenOnScreen;
+}
+
 void Asteroid::update(float delta)
 {
     Object2D::move(velocity * delta * 10.f);
-    if (Object2D::getPosition().x > windowAccessor->getView().getSize().x / 2.f + getGlobalBounds().width / 2.f || Object2D::getPosition().x < windowAccessor->getView().getSize().x / -2.0f - getGlobalBounds().width / 2.f)
+
+    if (checkIfHasNotBeenOnScreen())
+        return;
+
+    if (Object2D::getPosition().x > gameViewAccessor->getSize().x / 2.f + getLocalBounds().width / 2.f || Object2D::getPosition().x < gameViewAccessor->getSize().x / -2.0f - getLocalBounds().width / 2.f)
     {
-        Object2D::setPosition(-1 * sign(this->Object2D::getPosition().x) * (windowAccessor->getView().getSize().x / 2.f + getGlobalBounds().width / 2.f), Object2D::getPosition().y);
+        Object2D::setPosition(-1 * sign(this->Object2D::getPosition().x) * (gameViewAccessor->getSize().x / 2.f + getLocalBounds().width / 2.f), Object2D::getPosition().y);
     }
-    if (Object2D::getPosition().y > windowAccessor->getView().getSize().y / 2.0f + getGlobalBounds().height / 2.f || Object2D::getPosition().y < windowAccessor->getView().getSize().y / -2.0f - getGlobalBounds().height / 2.f)
+    if (Object2D::getPosition().y > gameViewAccessor->getSize().y / 2.0f + getLocalBounds().height / 2.f || Object2D::getPosition().y < gameViewAccessor->getSize().y / -2.0f - getLocalBounds().height / 2.f)
     {
-        Object2D::setPosition(Object2D::getPosition().x, -1 * sign(this->Object2D::getPosition().y) * (windowAccessor->getView().getSize().y / 2.f + getGlobalBounds().height / 2.f));
+        Object2D::setPosition(Object2D::getPosition().x, -1 * sign(this->Object2D::getPosition().y) * (gameViewAccessor->getSize().y / 2.f + getLocalBounds().height / 2.f));
     }
 }
 
@@ -101,33 +118,28 @@ void Asteroid::impact(sf::Vector2f position, size_t point1, size_t point2)
 {
     queueDelete = true;
 }
-void Asteroid::impact()
+
+void Asteroid::impact(AsteroidMath::Vector2 bulletDirection)
 {
-    if (this->size > 1)
+    if (this->size.size > 1)
     {
-        new Asteroid(size - 1, this->Object2D::getPosition());
-        new Asteroid(size - 1, this->Object2D::getPosition());
+        AsteroidMath::Vector2 direction1 = {bulletDirection.getY() * -1, bulletDirection.getX()};
+        AsteroidMath::Vector2 newPosition1 = direction1 * SizeVals::getSize(size.size - 1).maxRadius;
+
+        AsteroidMath::Vector2 direction2 = direction1;
+        direction2.rotate(M_PI);
+        AsteroidMath::Vector2 newPosition2 = newPosition2 * SizeVals::getSize(size.size - 1).maxRadius;
+
+        sf::Vector2f temp1 = this->Object2D::getTransform().transformPoint(newPosition1);
+        sf::Vector2f temp2 = this->Object2D::getTransform().transformPoint(newPosition2);
+
+        // Couldn't figure out how to offset the asteroids. Doesn't look bad, regardless.
+        new Asteroid(size.size - 1, this->Object2D::getPosition(), direction1);
+        new Asteroid(size.size - 1, this->Object2D::getPosition(), direction2);
     }
+    Asteroid::points += this->size.pointValue;
     queueDelete = true;
 }
-
-// void Asteroid::calculateNormals()
-// {
-//     if (this->normals.capacity() != this->getPointCount())
-//     {
-//         this->normals.resize(this->getPointCount());
-//     }
-//     for (size_t i = 0; i < this->getPointCount(); i++)
-//     {
-//         sf::Vector2f p1 = this->getPoint(i); // I need a toGlobal() function for this and the one following.
-//         sf::Vector2f p2 = this->getPoint(i + 1 == this->getPointCount() ? 0 : i + 1);
-
-//         sf::Vector2f edge = p1 - p2;
-//         AsteroidMath::Vector2 normal = {edge.y * -1, edge.x};
-//         normal.normalize();
-//         this->normals[i] = normal;
-//     }
-// }
 
 /**
  * @brief Calculates the centroid of the polygon. Currently not functional...
@@ -151,7 +163,7 @@ sf::Vector2f Asteroid::calculateCentroid()
         x1 = getPoint(i + 1).x;
         y1 = getPoint(i + 1).y;
         a = x0 * y1 - x1 * y0;
-        signedArea == a;
+        signedArea = a;
         centroid.x += (x0 + x1) * a;
         centroid.y += (y0 + y1) * a;
     }
@@ -182,15 +194,16 @@ void Asteroid::circumCirclePolygon()
 
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::uniform_int_distribution<int> pointCount(4 + size, 5 * size);
-    std::uniform_real_distribution<float> angles(0.0f, 1.0f);
 
-    float radius = size * 40;
+    std::uniform_int_distribution<int> pointCount(size.minPointCount, size.maxPointCount);
+    std::uniform_real_distribution<float> angles(0.0f, 1.0f);
+    std::uniform_real_distribution<float> radii(size.minRadius, size.maxRadius);
 
     size_t n = pointCount(gen);
     this->setPointCount(n);
 
     std::vector<float> vertAngles;
+
     for (size_t i = 0; i < n; i++)
     {
         float angle = angles(gen) * M_PI * 2.f;
@@ -214,6 +227,7 @@ void Asteroid::circumCirclePolygon()
     }
     std::sort(vertAngles.begin(), vertAngles.end()); // Check back to see if this needs this sorting algorithm: [](float a, float b){ return a - b;}
 
+    float radius = radii(gen);
     for (size_t i = 0; i < n; i++)
     {
         this->setPoint(i, {radius * cos(vertAngles[i]), radius * sin(vertAngles[i])});

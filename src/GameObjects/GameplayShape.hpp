@@ -16,6 +16,9 @@ public:
 
     sf::Vector2f getVelocity() const {return this->velocity;}
     void calculateNormals();
+
+    void setVelocity(AsteroidMath::Vector2 v) {velocity = v;}
+    sf::Vector2f getTransformedPoint(size_t index);
 private:
     std::vector<sf::Vector2f> normals;
     void onDraw(sf::RenderTarget &target, const sf::Transform &transform) const

@@ -13,14 +13,13 @@ Bullet::Bullet(sf::Vector2f rotation, sf::Vector2f playerPosition)
     this->setPoint(2, {2.f, -5.f});
     this->setPoint(3, {-2.f, -5.f});
 
-    this->velocity = rotation;
-
     this->Object2D::setPosition(playerPosition + (rotation * 25.f));
     this->setOutlineColor(Game::getColorPalette().secondary);
     this->setOutlineThickness(-4);
 
     this->Object2D::setRotation(toDegrees(atan(rotation.y / rotation.x)) - 90);
     this->travelRotation = rotation;
+    collidedThisFrame = false;
     bulletAccessor->push_back(this);
 }
 
@@ -43,5 +42,6 @@ void Bullet::update(float delta)
 
 void Bullet::impact()
 {
+    collidedThisFrame = true;
     queueDelete = true;
 }
