@@ -1,23 +1,24 @@
 #include "MenuButton.hpp"
 
-MenuButton::MenuButton(std::string string, sf::Font font)
+MenuButton::MenuButton(std::string string, sf::Font &font)
 {
     this->text.setFont(font);
     this->text.setString(string);
-    this->text.setCharacterSize(40);
-    this->text.setOrigin(this->text.getLocalBounds().width / 2.f, this->text.getLocalBounds().height / 2.f);
+    this->text.setCharacterSize(45);
+    std::cout << text.getLocalBounds().width << ", " << text.getLocalBounds().height << '\n';
+    this->text.setOrigin(this->text.getLocalBounds().width / 2.f, this->text.getLocalBounds().height / 2.f + 10.f);
     rectangleShape.setSize({350, 120});
     this->setOrigin(rectangleShape.getLocalBounds().width / 2.f, rectangleShape.getLocalBounds().height / 2.f);
     setColorPalette(Game::getColorPalette());
+    text.setPosition(this->getOrigin());
     rectangleShape.setOutlineThickness(4.f);
-    text.setPosition(1080.f, 720.f);
 }
 
 void MenuButton::setColorPalette(const ColorPalette &colorPalette)
 {
     this->text.setFillColor(colorPalette.secondary);
     this->rectangleShape.setFillColor(colorPalette.primary);
-    this->rectangleShape.setOutlineColor(colorPalette.tertiary);
+    this->rectangleShape.setOutlineColor(colorPalette.secondary);
 }
 
 sf::FloatRect MenuButton::getGlobalBounds()
@@ -32,7 +33,6 @@ bool MenuButton::isPressed(const sf::Window &window)
 
 void MenuButton::onDraw(sf::RenderTarget &target, const sf::Transform &transform) const
 {
-    text.setString("PLAY");
-    target.draw(rectangleShape, this->getTransform());
-    target.draw(text);
+    target.draw(rectangleShape, transform);
+    target.draw(text, transform);
 }

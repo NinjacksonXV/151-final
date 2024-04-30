@@ -6,8 +6,8 @@
 class MenuButton : public Colorable, public Object2D
 {
 public:
-    MenuButton(std::string text, sf::Font font);
-    mutable sf::Text text;
+    MenuButton(std::string text, sf::Font &font);
+    sf::Text text;
     void setColorPalette(const ColorPalette &colorPalette) override;
     sf::FloatRect getGlobalBounds();
     bool isPressed(const sf::Window &window);
