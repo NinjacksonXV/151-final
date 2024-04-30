@@ -18,8 +18,15 @@ public:
     void collided(sf::Vector2f minTranslation, float magnitude);
     void respawn();
 
+enum State
+{
+    DEAD,
+    INITIALIZING,
+    PLAYING,
+} state = INITIALIZING;
+
 private:
-    bool dieAnimation(float delta);
+    void dieAnimation(float delta);
     bool deathState = false;
 };
 

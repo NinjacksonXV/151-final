@@ -29,6 +29,9 @@ bool spacePressed = false;
 AsteroidMath::Vector2 direction;
 
 int deathSpinDirection = 1;
+float postDeathDelay;
+
+float initializationTimer;
 
 void Player::init()
 {
@@ -39,9 +42,13 @@ void Player::init()
     setPoint(2, {30, 10});
     setPoint(3, {0, 0});
     Object2D::setOrigin({0, -5});
+    Object2D::setPosition({0, 0});
     setFillColor(Game::getColorPalette().primary);
     setOutlineColor(Game::getColorPalette().secondary);
     setOutlineThickness(4.0f);
+
+    state = INITIALIZING;
+    initializationTimer = 1.5f;
 
     direction = AsteroidMath::Vector2::UP;
 }
@@ -56,7 +63,6 @@ void Player::collided(sf::Vector2f impactVector, float magnitude)
 {
     if (deathState == true || collisionGracePeriod > 0.f)
         return;
-    std::cout << impactVector << " " << magnitude << '\n';
     Object2D::move(impactVector * magnitude);
     impacts--;
     collisionGracePeriod = .2f;
@@ -77,7 +83,7 @@ void Player::collided(sf::Vector2f impactVector, float magnitude)
  * @return true
  * @return false
  */
-bool Player::dieAnimation(float delta)
+void Player::dieAnimation(float delta)
 {
     if (rotationDelta == 0)
         rotationDelta = deathSpinDirection * turnSpeed;
@@ -85,15 +91,26 @@ bool Player::dieAnimation(float delta)
     {
         Object2D::move(velocity * delta);
         Object2D::rotate(toDegrees(delta * rotationDelta * 2.f));
-        return false;
+        postDeathDelay = 1.f;
+    }
+    else if (postDeathDelay > 0.f)
+    {
+        postDeathDelay -= delta;
     }
     else
-        return true;
+        state = DEAD;
 }
 
 void Player::update(float delta)
 {
-    std::cout << delta << '\n';
+    state = PLAYING; // TEMPORARY
+    if (state == INITIALIZING && initializationTimer > 0.f)
+    {
+        initializationTimer -= delta;
+    }
+    else
+        state = PLAYING;
+
     accelerationVisualCooldown -= delta;
 
     if (deathState == true)
