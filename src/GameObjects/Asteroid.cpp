@@ -4,19 +4,20 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
+unsigned int Asteroid::points;
+
 SizeVals &SizeVals::getSize(unsigned int size)
 {
     static SizeVals sizes[] =
         {
-            SizeVals(1, 5.f, 10.f, .7f, 5, 8, 30, 40),    // Size 1
-            SizeVals(2, 4.f, 8.f, .7f, 9, 12, 50, 70),    // Size 2
-            SizeVals(3, 4.f, 6.f, .7f, 13, 15, 80, 110),  // Size 3
-            SizeVals(4, 2.f, 4.f, 3.f, 16, 22, 130, 160), // Size 4
+            SizeVals(1, 20, 7.f, 35.f, .7f, 5, 8, 30, 40),    // Size 1
+            SizeVals(2, 15, 4.f, 20.f, .7f, 9, 12, 50, 70),   // Size 2
+            SizeVals(3, 10, 4.f, 15.f, .7f, 13, 15, 80, 110),  // Size 3
+            SizeVals(4, 5, 4.f, 8.f, 3.f, 16, 22, 130, 160), // Size 4
         };
 
     if (size > sizeof(sizes) / sizeof(SizeVals))
     {
-
         throw std::runtime_error("Wrong size");
     }
     return sizes[size - 1];
@@ -26,8 +27,11 @@ Asteroid::Asteroid(unsigned int size) : size(SizeVals::getSize(size)), hasNotBee
 {
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::uniform_real_distribution<float> pos(windowAccessor->getView().getSize().x / -2.f, windowAccessor->getView().getSize().x / 2.f);
+    std::uniform_real_distribution<float> pos(
+        (gameViewAccessor->getSize().x / -2.f) + 100.f,
+        (gameViewAccessor->getSize().x / 2.f) - 100.f);
     std::uniform_real_distribution<float> speed(this->size.minSpeed, this->size.maxSpeed);
+    std::uniform_real_distribution<float> rot(M_PI / -3.f, M_PI / 3.f);
     std::uniform_int_distribution<> side(1, 4);
 
     asteroidAccessor->push_back(this);
@@ -35,40 +39,43 @@ Asteroid::Asteroid(unsigned int size) : size(SizeVals::getSize(size)), hasNotBee
     switch (side(gen))
     {
     case 1:
-        Object2D::setPosition(windowAccessor->getView().getSize().x / 2.f + this->getLocalBounds().height / 2.f, pos(gen));
+        Object2D::setPosition((gameViewAccessor->getSize().x / 2.f) + this->getLocalBounds().width, pos(gen));
+        this->velocity = AsteroidMath::Vector2::LEFT;
         break;
     case 2:
-        Object2D::setPosition(windowAccessor->getView().getSize().x / -2.f - this->getLocalBounds().height / 2.f, pos(gen));
+        Object2D::setPosition(gameViewAccessor->getSize().x / -2.f - this->getLocalBounds().width, pos(gen));
+        this->velocity = AsteroidMath::Vector2::RIGHT;
+        break;
     case 3:
-        Object2D::setPosition(pos(gen), windowAccessor->getView().getSize().x / 2.f + this->getLocalBounds().width / 2.f);
+        Object2D::setPosition(pos(gen), gameViewAccessor->getSize().x / 2.f + this->getLocalBounds().height);
+        this->velocity = AsteroidMath::Vector2::UP;
         break;
     case 4:
-        Object2D::setPosition(pos(gen), windowAccessor->getView().getSize().x / -2.f - this->getLocalBounds().width / 2.f);
+        Object2D::setPosition(pos(gen), gameViewAccessor->getSize().x / -2.f - this->getLocalBounds().height);
+        this->velocity = AsteroidMath::Vector2::DOWN;
         break;
     }
 
-    this->velocity = AsteroidMath::Vector2::UP;
-    velocity.rotate(pos(gen));
+    velocity.rotate(rot(gen));
     velocity *= speed(gen);
-    // calculateCentroid();
-    // this->Object2D::setOrigin(this->calculateCentroid());
     this->setColorPalette(Game::getColorPalette());
     this->setOutlineThickness(-4.0f);
 }
 
-Asteroid::Asteroid(unsigned int size, sf::Vector2f position) : size(SizeVals::getSize(size))
+Asteroid::Asteroid(unsigned int size, sf::Vector2f position, sf::Vector2f direction) : size(SizeVals::getSize(size))
 {
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::uniform_real_distribution<float> angles(0, M_PI * 2.f);
+    std::uniform_real_distribution<float> speed(this->size.minSpeed, this->size.maxSpeed);
 
+    float generatedSpeed = speed(gen);
     circumCirclePolygon();
     this->Object2D::setPosition(position);
-    // this->Object2D::setOrigin(this->calculateCentroid());
+    this->velocity = asAMVector2(direction) * generatedSpeed;
+    std::cout << "DIRECTION:" << direction << '\n';
     this->setColorPalette(Game::getColorPalette());
     this->setOutlineThickness(-4.0f);
     asteroidAccessor->push_back(this);
-    this->velocity = AsteroidMath::Vector2(angles(gen), angles(gen)) * angles(gen);
 }
 
 void Asteroid::setColorPalette(const ColorPalette &colorPalette)
@@ -79,7 +86,7 @@ void Asteroid::setColorPalette(const ColorPalette &colorPalette)
 
 bool Asteroid::checkIfHasNotBeenOnScreen()
 {
-    if (abs(this->Object2D::getPosition().x) > windowAccessor->getView().getSize().x / 2.f || abs(this->Object2D::getPosition().y) > windowAccessor->getView().getSize().y)
+    if (abs(this->Object2D::getPosition().x) > gameViewAccessor->getSize().x / 2.f && abs(this->Object2D::getPosition().y) > gameViewAccessor->getSize().y)
         hasNotBeenOnScreen = false;
     return hasNotBeenOnScreen;
 }
@@ -91,13 +98,13 @@ void Asteroid::update(float delta)
     if (checkIfHasNotBeenOnScreen())
         return;
 
-    if (Object2D::getPosition().x > windowAccessor->getView().getSize().x / 2.f + getGlobalBounds().width / 2.f || Object2D::getPosition().x < windowAccessor->getView().getSize().x / -2.0f - getGlobalBounds().width / 2.f)
+    if (Object2D::getPosition().x > gameViewAccessor->getSize().x / 2.f + getGlobalBounds().width / 2.f || Object2D::getPosition().x < gameViewAccessor->getSize().x / -2.0f - getGlobalBounds().width / 2.f)
     {
-        Object2D::setPosition(-1 * sign(this->Object2D::getPosition().x) * (windowAccessor->getView().getSize().x / 2.f + getGlobalBounds().width / 2.f), Object2D::getPosition().y);
+        Object2D::setPosition(-1 * sign(this->Object2D::getPosition().x) * (gameViewAccessor->getSize().x / 2.f + getGlobalBounds().width / 2.f), Object2D::getPosition().y);
     }
-    if (Object2D::getPosition().y > windowAccessor->getView().getSize().y / 2.0f + getGlobalBounds().height / 2.f || Object2D::getPosition().y < windowAccessor->getView().getSize().y / -2.0f - getGlobalBounds().height / 2.f)
+    if (Object2D::getPosition().y > gameViewAccessor->getSize().y / 2.0f + getGlobalBounds().height / 2.f || Object2D::getPosition().y < gameViewAccessor->getSize().y / -2.0f - getGlobalBounds().height / 2.f)
     {
-        Object2D::setPosition(Object2D::getPosition().x, -1 * sign(this->Object2D::getPosition().y) * (windowAccessor->getView().getSize().y / 2.f + getGlobalBounds().height / 2.f));
+        Object2D::setPosition(Object2D::getPosition().x, -1 * sign(this->Object2D::getPosition().y) * (gameViewAccessor->getSize().y / 2.f + getGlobalBounds().height / 2.f));
     }
 }
 
@@ -113,12 +120,28 @@ void Asteroid::impact(sf::Vector2f position, size_t point1, size_t point2)
     queueDelete = true;
 }
 
-void Asteroid::impact()
+void Asteroid::impact(AsteroidMath::Vector2 bulletDirection)
 {
     if (this->size.size > 1)
     {
-        new Asteroid(size.size - 1, this->Object2D::getPosition());
-        new Asteroid(size.size - 1, this->Object2D::getPosition());
+        AsteroidMath::Vector2 direction1 = {bulletDirection.getY() * -1, bulletDirection.getX()};
+        AsteroidMath::Vector2 newPosition1 = direction1 * SizeVals::getSize(size.size - 1).maxRadius;
+
+        AsteroidMath::Vector2 direction2 = direction1;
+        direction2.rotate(M_PI);
+        AsteroidMath::Vector2 newPosition2 = newPosition2 * SizeVals::getSize(size.size - 1).maxRadius;
+
+        sf::Vector2f temp1 = this->Object2D::getTransform().transformPoint(newPosition1);
+        sf::Vector2f temp2 = this->Object2D::getTransform().transformPoint(newPosition2);
+
+
+        // Couldn't figure out how to offset the asteroids. Doesn't look bad, regardless.
+        new Asteroid(size.size - 1, this->Object2D::getPosition(), direction1);
+        new Asteroid(size.size - 1, this->Object2D::getPosition(), direction2);
+    }
+    else
+    {
+        Asteroid::points += this->size.pointValue;
     }
     queueDelete = true;
 }
@@ -177,19 +200,15 @@ void Asteroid::circumCirclePolygon()
     std::random_device rd;
     std::mt19937 gen(rd());
 
-    std::cout << size.minPointCount << " - " << size.maxPointCount << '\n';
-
     std::uniform_int_distribution<int> pointCount(size.minPointCount, size.maxPointCount);
     std::uniform_real_distribution<float> angles(0.0f, 1.0f);
     std::uniform_real_distribution<float> radii(size.minRadius, size.maxRadius);
 
-    std::cout << "Got here";
     size_t n = pointCount(gen);
-    std::cout << n;
     this->setPointCount(n);
-    std::cout << "Got here1";
+
     std::vector<float> vertAngles;
-    std::cout << "Got here2";
+
     for (size_t i = 0; i < n; i++)
     {
         float angle = angles(gen) * M_PI * 2.f;

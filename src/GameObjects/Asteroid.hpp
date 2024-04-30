@@ -4,14 +4,16 @@
 #include "GameplayShape.hpp"
 
 extern sf::RenderTarget const *windowAccessor;
+extern sf::View const *gameViewAccessor;
 
 struct SizeVals
 {
-    SizeVals(unsigned int size, float minSpeed, float maxSpeed, float maxRotationSpeed, unsigned int minPointCount, unsigned int maxPointCount, unsigned int minRadius, unsigned int maxRadius)
-        : size(size), minSpeed(minSpeed), maxSpeed(maxSpeed), maxRotationSpeed(maxRotationSpeed), minPointCount(minPointCount), maxPointCount(maxPointCount), minRadius(minRadius), maxRadius(maxRadius){};
+    SizeVals(unsigned int size, unsigned int pointValue, float minSpeed, float maxSpeed, float maxRotationSpeed, unsigned int minPointCount, unsigned int maxPointCount, unsigned int minRadius, unsigned int maxRadius)
+        : size(size), pointValue(pointValue), minSpeed(minSpeed), maxSpeed(maxSpeed), maxRotationSpeed(maxRotationSpeed), minPointCount(minPointCount), maxPointCount(maxPointCount), minRadius(minRadius), maxRadius(maxRadius){};
     unsigned int size;
-    float maxSpeed;
+    unsigned int pointValue;
     float minSpeed;
+    float maxSpeed;
     float maxRotationSpeed;
     unsigned int minPointCount;
     unsigned int maxPointCount;
@@ -24,16 +26,19 @@ struct SizeVals
 class Asteroid : public GameplayShape
 {
 public:
-    Asteroid(std::vector<sf::Vector2f> points, sf::Vector2f position);
     Asteroid(unsigned int size);
-    Asteroid(unsigned int size, sf::Vector2f position);
+    Asteroid(unsigned int size, sf::Vector2f position, sf::Vector2f direction);
     void setColorPalette(const ColorPalette &colorPalette);
     void update(float delta) override;
 
     void impact(sf::Vector2f position, size_t point1, size_t point2);
-    void impact();
+    void impact(AsteroidMath::Vector2 bulletDirection);
     bool queueDelete = false;
 
+    unsigned int getSize() {return size.size;}
+
+    static unsigned int points;
+    
 private:
     SizeVals size;
     // void split();
