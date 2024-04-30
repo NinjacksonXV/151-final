@@ -5,7 +5,6 @@ MenuButton::MenuButton(std::string string, sf::Font &font)
     this->text.setFont(font);
     this->text.setString(string);
     this->text.setCharacterSize(45);
-    std::cout << text.getLocalBounds().width << ", " << text.getLocalBounds().height << '\n';
     this->text.setOrigin(this->text.getLocalBounds().width / 2.f, this->text.getLocalBounds().height / 2.f + 10.f);
     rectangleShape.setSize({350, 120});
     this->setOrigin(rectangleShape.getLocalBounds().width / 2.f, rectangleShape.getLocalBounds().height / 2.f);

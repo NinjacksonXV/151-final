@@ -1,5 +1,10 @@
-# 151 Final
+# 151 Final - Asteroids
 Project for CS-151 final at North Idaho College, written in C++ and using [SFML](https://www.sfml-dev.org/). 
+
+![](asset-source\Asteroids_d4NzNC3XRB.png)
+
+![](asset-source\Asteroids_GRfdVU8KXI.png)
+
 
 ## Build Instructions
 If you are building on Windows and using G++ via MSYS2, it is recommended to install SFML via the MSYS2 UCRT terminal with the following command:
