@@ -12,8 +12,8 @@ SizeVals &SizeVals::getSize(unsigned int size)
         {
             SizeVals(1, 20, 7.f, 35.f, .7f, 5, 8, 30, 40),    // Size 1
             SizeVals(2, 15, 4.f, 20.f, .7f, 9, 12, 50, 70),   // Size 2
-            SizeVals(3, 10, 4.f, 15.f, .7f, 13, 15, 80, 110),  // Size 3
-            SizeVals(4, 5, 4.f, 8.f, 3.f, 16, 22, 130, 160), // Size 4
+            SizeVals(3, 10, 4.f, 15.f, .7f, 13, 15, 80, 110), // Size 3
+            SizeVals(4, 5, 4.f, 8.f, 3.f, 16, 22, 130, 160),  // Size 4
         };
 
     if (size > sizeof(sizes) / sizeof(SizeVals))
@@ -72,7 +72,6 @@ Asteroid::Asteroid(unsigned int size, sf::Vector2f position, sf::Vector2f direct
     circumCirclePolygon();
     this->Object2D::setPosition(position);
     this->velocity = asAMVector2(direction) * generatedSpeed;
-    std::cout << "DIRECTION:" << direction << '\n';
     this->setColorPalette(Game::getColorPalette());
     this->setOutlineThickness(-4.0f);
     asteroidAccessor->push_back(this);
@@ -134,15 +133,11 @@ void Asteroid::impact(AsteroidMath::Vector2 bulletDirection)
         sf::Vector2f temp1 = this->Object2D::getTransform().transformPoint(newPosition1);
         sf::Vector2f temp2 = this->Object2D::getTransform().transformPoint(newPosition2);
 
-
         // Couldn't figure out how to offset the asteroids. Doesn't look bad, regardless.
         new Asteroid(size.size - 1, this->Object2D::getPosition(), direction1);
         new Asteroid(size.size - 1, this->Object2D::getPosition(), direction2);
     }
-    else
-    {
-        Asteroid::points += this->size.pointValue;
-    }
+    Asteroid::points += this->size.pointValue;
     queueDelete = true;
 }
 
