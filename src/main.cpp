@@ -421,6 +421,13 @@ int main()
                 gameState = GameState::Menu;
                 break;
             }
+            if (playAgain.isPressed(window))
+            {
+                score.setString("SCORE: 00000");
+                Asteroid::points = 0;
+                player.init();
+                gameState = GameState::NewRound;
+            }
             break;
         }
         }
