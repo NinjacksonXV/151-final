@@ -10,24 +10,27 @@ extern sf::RenderTarget const *windowAccessor;
 class Player : public GameplayShape
 {
 public:
+    Player();
     void init();
     void update(float delta);
 
     void setColorPalette(const ColorPalette &colorPalette);
     size_t getCollisionPointCount() override { return 3; };
     void collided(sf::Vector2f minTranslation, float magnitude);
-    void respawn();
 
-enum State
-{
-    DEAD,
-    INITIALIZING,
-    PLAYING,
-} state = INITIALIZING;
+    unsigned int getHP() { return this->impacts; }
+
+    enum State
+    {
+        DEAD,
+        INITIALIZING,
+        PLAYING,
+    } state = INITIALIZING;
 
 private:
     void dieAnimation(float delta);
     bool deathState = false;
+    unsigned int impacts = 3;
 };
 
 // TO-DO: Move this into its own header/compilation unit. Actually... this is never getting done. Hah.

@@ -13,8 +13,6 @@ float turnSpeed = 4.5f;
 float rotationDelta;
 float knockback = 1300.f;
 
-unsigned int impacts = 2;
-
 float rotationDeltaSpeedBoost = 1.4f;
 
 float turnAroundSpeedBoostThreshold = -.8f;
@@ -33,8 +31,9 @@ float postDeathDelay;
 
 float initializationTimer;
 
-void Player::init()
+Player::Player()
 {
+    this->impacts = 3;
     this->setPointCount(4);
     // When detecting collision, you need to transform these points by the player transform. Put this logic in GameplayShape
     setPoint(0, {-30, 10});
@@ -42,14 +41,16 @@ void Player::init()
     setPoint(2, {30, 10});
     setPoint(3, {0, 0});
     Object2D::setOrigin({0, -5});
-    Object2D::setPosition({0, 0});
     setFillColor(Game::getColorPalette().primary);
     setOutlineColor(Game::getColorPalette().secondary);
     setOutlineThickness(4.0f);
 
+}
+void Player::init()
+{
+    Object2D::setPosition({0, 0});
     state = INITIALIZING;
     initializationTimer = 1.5f;
-
     direction = AsteroidMath::Vector2::UP;
 }
 
@@ -73,7 +74,6 @@ void Player::collided(sf::Vector2f impactVector, float magnitude)
         deathSpinDirection = sign(impactVector.x);
         velocity = velocity.limitLength(maxSpeed);
     }
-    // std::cout << "Velocity: " << velocity << '\n';
 }
 
 /**
@@ -103,10 +103,10 @@ void Player::dieAnimation(float delta)
 
 void Player::update(float delta)
 {
-    state = PLAYING; // TEMPORARY
     if (state == INITIALIZING && initializationTimer > 0.f)
     {
         initializationTimer -= delta;
+        return;
     }
     else
         state = PLAYING;
