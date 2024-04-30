@@ -2,7 +2,6 @@
 
 void Object2D::draw(sf::RenderTarget &target) const
 {
-
     for (std::size_t i = 0; i < children.size(); ++i)
         children[i]->draw(target, this->getTransform());
     onDraw(target, this->getTransform());

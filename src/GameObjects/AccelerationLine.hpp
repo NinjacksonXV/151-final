@@ -1,6 +1,7 @@
 #include <list>
 #include "GameplayShape.hpp"
 #pragma once
+
 class AccelerationLine : public GameplayShape
 {
     public:
