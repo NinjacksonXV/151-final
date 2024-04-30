@@ -28,7 +28,22 @@ sf::FloatRect MenuButton::getGlobalBounds()
 
 bool MenuButton::isPressed(const sf::Window &window)
 {
-    return this->getGlobalBounds().contains(static_cast<sf::Vector2f>(sf::Mouse::getPosition(window))) && sf::Mouse::isButtonPressed(sf::Mouse::Button::Left);
+    if (this->getGlobalBounds().contains(static_cast<sf::Vector2f>(sf::Mouse::getPosition(window))) && sf::Mouse::isButtonPressed(sf::Mouse::Button::Left))
+    {
+        if (wasPressed)
+            return false;
+        else
+        {
+            wasPressed = true;
+            return true;
+        }
+    }
+    else
+    {
+        wasPressed = false;
+        return false;
+    }
+    // return this->getGlobalBounds().contains(static_cast<sf::Vector2f>(sf::Mouse::getPosition(window))) && sf::Mouse::isButtonPressed(sf::Mouse::Button::Left);
 }
 
 void MenuButton::onDraw(sf::RenderTarget &target, const sf::Transform &transform) const

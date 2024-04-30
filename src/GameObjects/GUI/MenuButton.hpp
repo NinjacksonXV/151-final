@@ -12,6 +12,7 @@ public:
     sf::FloatRect getGlobalBounds();
     bool isPressed(const sf::Window &window);
 private: 
+    bool wasPressed = false;
     sf::RectangleShape rectangleShape;
     void onDraw(sf::RenderTarget &target, const sf::Transform &transform) const;
 };
