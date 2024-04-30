@@ -5,7 +5,7 @@
 
 float minAccelerationVelocity = 1.5f;
 
-float acceleration = 17.f;
+float acceleration = 1000.f;
 float deceleration = 1.0f;
 float maxSpeed = 570.f;
 
@@ -15,7 +15,7 @@ float knockback = 1300.f;
 
 unsigned int impacts = 2;
 
-float rotationDeltaSpeedBoost = 1.8f;
+float rotationDeltaSpeedBoost = 1.4f;
 
 float turnAroundSpeedBoostThreshold = -.8f;
 float turnAroundSpeedBoost = 2.f;
@@ -93,6 +93,7 @@ bool Player::dieAnimation(float delta)
 
 void Player::update(float delta)
 {
+    std::cout << delta << '\n';
     accelerationVisualCooldown -= delta;
 
     if (deathState == true)
@@ -123,7 +124,7 @@ void Player::update(float delta)
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
     {
-        velocity += direction * acceleration * (rotationDelta != 0.f ? rotationDeltaSpeedBoost : 1.f);
+        velocity += direction * acceleration * (rotationDelta != 0.f ? rotationDeltaSpeedBoost : 1.f) * delta;
         if (accelerationVisualCooldown <= 0)
         {
             sf::Vector2f temp((direction * 15).getX(), (direction * 15).getY());
