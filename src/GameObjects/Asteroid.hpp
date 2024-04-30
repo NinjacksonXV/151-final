@@ -1,4 +1,5 @@
 #pragma once
+#include <SFML/Audio.hpp>
 
 #include "../Utilities.hpp"
 #include "GameplayShape.hpp"
@@ -20,7 +21,7 @@ struct SizeVals
     unsigned int minRadius;
     unsigned int maxRadius;
 
-    static SizeVals& getSize(unsigned int size);
+    static SizeVals &getSize(unsigned int size);
 };
 
 class Asteroid : public GameplayShape
@@ -35,10 +36,10 @@ public:
     void impact(AsteroidMath::Vector2 bulletDirection);
     bool queueDelete = false;
 
-    unsigned int getSize() {return size.size;}
+    unsigned int getSize() { return size.size; }
 
     static unsigned int points;
-    
+
 private:
     SizeVals size;
     // void split();
