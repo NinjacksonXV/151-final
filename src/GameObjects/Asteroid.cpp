@@ -97,13 +97,13 @@ void Asteroid::update(float delta)
     if (checkIfHasNotBeenOnScreen())
         return;
 
-    if (Object2D::getPosition().x > gameViewAccessor->getSize().x / 2.f + getGlobalBounds().width / 2.f || Object2D::getPosition().x < gameViewAccessor->getSize().x / -2.0f - getGlobalBounds().width / 2.f)
+    if (Object2D::getPosition().x > gameViewAccessor->getSize().x / 2.f + getLocalBounds().width / 2.f || Object2D::getPosition().x < gameViewAccessor->getSize().x / -2.0f - getLocalBounds().width / 2.f)
     {
-        Object2D::setPosition(-1 * sign(this->Object2D::getPosition().x) * (gameViewAccessor->getSize().x / 2.f + getGlobalBounds().width / 2.f), Object2D::getPosition().y);
+        Object2D::setPosition(-1 * sign(this->Object2D::getPosition().x) * (gameViewAccessor->getSize().x / 2.f + getLocalBounds().width / 2.f), Object2D::getPosition().y);
     }
-    if (Object2D::getPosition().y > gameViewAccessor->getSize().y / 2.0f + getGlobalBounds().height / 2.f || Object2D::getPosition().y < gameViewAccessor->getSize().y / -2.0f - getGlobalBounds().height / 2.f)
+    if (Object2D::getPosition().y > gameViewAccessor->getSize().y / 2.0f + getLocalBounds().height / 2.f || Object2D::getPosition().y < gameViewAccessor->getSize().y / -2.0f - getLocalBounds().height / 2.f)
     {
-        Object2D::setPosition(Object2D::getPosition().x, -1 * sign(this->Object2D::getPosition().y) * (gameViewAccessor->getSize().y / 2.f + getGlobalBounds().height / 2.f));
+        Object2D::setPosition(Object2D::getPosition().x, -1 * sign(this->Object2D::getPosition().y) * (gameViewAccessor->getSize().y / 2.f + getLocalBounds().height / 2.f));
     }
 }
 
