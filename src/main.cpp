@@ -31,7 +31,7 @@ bool isFullScreen;
 
 std::list<Colorable *> Colorable::colorables;
 
-sf::RenderTarget const *windowAccessor; // Make this a public static accessor of Game class later
+sf::RenderTarget const *windowAccessor;
 sf::View const *gameViewAccessor;
 std::list<Bullet *> *bulletAccessor;
 std::list<Asteroid *> *asteroidAccessor;
@@ -40,7 +40,9 @@ std::list<GameObject *> *gameObjectAccessor;
 float asteroid3SpawnCooldown = 5.f;
 float asteroid4SpawnCooldown = 6.f;
 
-// TO-DO: Move most of this logic to Game class
+void initializeText(sf::Font &primary, AsteroidText &title, AsteroidText &score, AsteroidText &hp, AsteroidText &instructions, AsteroidText &paused, AsteroidText &gameover, sf::RenderWindow &window);
+void cleanup(std::list<GameObject *> &gameObjects, std::list<Bullet *> &bullets, std::list<Asteroid *> &asteroids);
+
 int main()
 {
     std::vector<ColorPalette> palettes = {ColorPalette::basic,
@@ -52,7 +54,10 @@ int main()
     GameState gameState = GameState::Menu;
     Asteroid::points = 0;
     size_t colorPaletteIterator = 0;
+
     bool paletteCycleLock = false;
+    bool escapeLock = false;
+
     Game::setColorPalette(palettes[colorPaletteIterator]);
     isFullScreen = false;
     auto window = sf::RenderWindow{{1920u, 1080u}, "Asteroids", sf::Style::Titlebar | sf::Style::Close}; // This is nice to avoid resizing issues
@@ -79,20 +84,23 @@ int main()
                                        1.0f));
 
     gameViewAccessor = &gameView;
-    sf::Clock clock;
 
+    sf::Clock clock;
+    sf::Sprite door1_l, door1_r;
     sf::Texture door1Texture;
     door1Texture.loadFromFile("../../asset-source/door1.png");
     door1Texture.generateMipmap();
-    sf::Sprite door1_l(door1Texture), door1_r(door1Texture);
-    door1_l.setScale(gameView.getSize().x / door1Texture.getSize().x, gameView.getSize().y / door1Texture.getSize().y);
-    door1_r.setScale(gameView.getSize().x / door1Texture.getSize().x * -1.f, gameView.getSize().y / door1Texture.getSize().y);
+    {
+        door1_l.setTexture(door1Texture), door1_r.setTexture(door1Texture);
+        door1_l.setScale(gameView.getSize().x / door1Texture.getSize().x, gameView.getSize().y / door1Texture.getSize().y);
+        door1_r.setScale(gameView.getSize().x / door1Texture.getSize().x * -1.f, gameView.getSize().y / door1Texture.getSize().y);
 
-    door1_l.setOrigin(door1Texture.getSize().x, 0.0f);
-    door1_r.setOrigin(door1Texture.getSize().x, 0.0f);
+        door1_l.setOrigin(door1Texture.getSize().x, 0.0f);
+        door1_r.setOrigin(door1Texture.getSize().x, 0.0f);
 
-    door1_l.setPosition(window.getSize().x / 2.0f - gameView.getSize().x / 2.0f, 0.0f);
-    door1_r.setPosition((window.getSize().x - gameView.getSize().x) / 2.0f + gameView.getSize().x, 0.0f);
+        door1_l.setPosition(window.getSize().x / 2.0f - gameView.getSize().x / 2.0f, 0.0f);
+        door1_r.setPosition((window.getSize().x - gameView.getSize().x) / 2.0f + gameView.getSize().x, 0.0f);
+    }
 
     sf::InputSoundFile musicFile;
     musicFile.openFromFile("../../asset-source/music/bass3.wav");
@@ -108,69 +116,24 @@ int main()
     test2.setLoop(true);
 
     sf::Font primary;
-    primary.loadFromFile("../../asset-source/HyperspaceBold-GM0g.ttf");
     AsteroidText title, score, hp, instructions, paused, gameover;
-    title.setFont(primary);
-    score.setFont(primary);
-    hp.setFont(primary);
-    instructions.setFont(primary);
-    paused.setFont(primary);
-    gameover.setFont(primary);
+    initializeText(primary, title, score, hp, instructions, paused, gameover, window);
 
-    title.setString("Asteroids");
-    title.setCharacterSize(100);
-    title.setOrigin(title.getLocalBounds().width / 2.f, 0);
-    title.setPosition(window.getSize().x / 2.f, 100);
-
-    paused.setString("Paused");
-    paused.setCharacterSize(100);
-    paused.setOrigin(paused.getLocalBounds().width / 2.f, 0);
-    paused.setPosition(window.getSize().x / 2.f, 100);
-
-    hp.setString("HP: 0");
-    hp.setCharacterSize(70);
-    hp.setOrigin(hp.getLocalBounds().width, 0);
-    hp.setPosition(window.getSize().x / 4.f - 200.f, 30.f);
-
-    score.setString("SCORE: 00000");
-    score.setCharacterSize(70);
-    score.setOrigin(score.getLocalBounds().width / 2.f, 0);
-    score.setPosition(((window.getSize().x) / 2.f), window.getSize().y - 300.f);
-
-    instructions.setString(
-        "    INSTRUCTIONS:\n\n"
-        "     Accelerate\n"
-        "          W           \n"
-        "Left -- A / D -- Right\n"
-        "       [Space]        \n"
-        "        Shoot         \n"
-        "\n"
-        "       EXTRAS\n"
-        "  P   -- Cycle colors");
-    instructions.setLineSpacing(.9f);
-    instructions.setCharacterSize(24);
-    instructions.setOrigin(instructions.getLocalBounds().width, 0);
-    instructions.setPosition(window.getSize().x - 24.f, 30.f);
-
-    gameover.setString("Game\nOver");
-    gameover.setCharacterSize(100);
-    gameover.setOrigin(gameover.getLocalBounds().width / 2.f, 0);
-    gameover.setPosition(window.getSize().x / 2.f, 100);
-
-    MenuButton quit("Quit", primary);
     MenuButton play("Play", primary);
+    MenuButton quit("Quit", primary);
     MenuButton playAgain("Play Again", primary);
+    MenuButton resume("Resume", primary);
 
     play.setPosition(window.getSize().x / 2.f, window.getSize().y * (2.f / 3.f));
-    std::cout << play.getPosition();
-    sf::Sound soundTest;
+    quit.setPosition(play.getPosition().x, play.getPosition().y + (quit.getGlobalBounds().height) + 20.f);
+    playAgain.setPosition(play.getPosition());
+    resume.setPosition(play.getPosition());
+
+    sf::Sound drums;
     sf::SoundBuffer soundTestBuffer;
     soundTestBuffer.loadFromFile("../../asset-source/music/drums.wav");
-    soundTest.setBuffer(soundTestBuffer);
-
-    soundTest.setLoop(true);
-
-    soundTest.play();
+    drums.setBuffer(soundTestBuffer);
+    drums.setLoop(true);
 
     for (GameObject *gameObject : gameObjects)
     {
@@ -242,7 +205,7 @@ int main()
             window.draw(title);
 
             play.draw(window);
-            // quit.draw(window);
+            quit.draw(window);
 
             if (play.isPressed(window)) // Menu stuff later
             {
@@ -256,6 +219,11 @@ int main()
                 Asteroid::points = 0;
                 player.init();
                 gameState = GameState::NewRound;
+                break;
+            }
+            if (quit.isPressed(window))
+            {
+                window.close();
                 break;
             }
             break;
@@ -274,6 +242,7 @@ int main()
             if (player.state == Player::INITIALIZING)
             {
                 gameState = GameState::Playing;
+                drums.play();
                 break;
             }
             break;
@@ -282,32 +251,10 @@ int main()
         {
             if (player.state == Player::DEAD)
             {
-                for (GameObject *gameObject : gameObjects)
-                {
-                    if (dynamic_cast<AccelerationLine *>(gameObject) != nullptr)
-                    {
-                        delete gameObject;
-                    }
-                }
-                gameObjects.clear();
-                gameObjects.push_back(&stars); // Stupid, but I can't clear out only AccelerationLines or it crashes :/
-                for (Bullet *bullet : bullets)
-                {
-                    delete bullet;
-                }
-                for (Asteroid *asteroid : asteroids)
-                {
-                    delete asteroid;
-                }
-                asteroids.clear();
-                bullets.clear();
+                cleanup(gameObjects, bullets, asteroids);
                 score.setPosition(((window.getSize().x) / 2.f), window.getSize().y - 700.f);
                 gameState = GameState::GameOver;
-                break;
-            }
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))
-            {
-                gameState = GameState::Paused;
+                drums.stop();
                 break;
             }
             window.setView(gameView);
@@ -386,6 +333,22 @@ int main()
 
             hp.setString("HP: " + std::to_string(player.getHP()));
             window.draw(hp);
+
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))
+            {
+                if (escapeLock == false)
+                {
+                    gameState = GameState::Paused;
+                    score.setPosition(((window.getSize().x) / 2.f), window.getSize().y - 700.f);
+                    escapeLock = true;
+                    break;
+                }
+            }
+            else
+            {
+                escapeLock = false;
+            }
+
             break;
         }
         case GameState::Paused:
@@ -406,21 +369,145 @@ int main()
             player.draw(window);
 
             window.setView(window.getDefaultView());
+            window.draw(score);
             window.draw(instructions);
             window.draw(paused);
+
+            resume.draw(window);
+            quit.draw(window);
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))
+            {
+                if (escapeLock == false)
+                {
+                    score.setPosition(((window.getSize().x) / 2.f), window.getSize().y - 300.f);
+                    gameState = GameState::Playing;
+                    escapeLock = true;
+                    break;
+                }
+            }
+            else
+            {
+                escapeLock = false;
+            }
+
+            if (resume.isPressed(window))
+            {
+                score.setPosition(((window.getSize().x) / 2.f), window.getSize().y - 300.f);
+                gameState = GameState::Playing;
+                break;
+            }
+
+            if (quit.isPressed(window))
+            {
+                cleanup(gameObjects, bullets, asteroids);
+                gameState = GameState::Menu;
+                break;
+            }
             break;
         }
         case GameState::GameOver:
         {
             window.setView(gameView);
             stars.draw(window);
+
             window.setView(window.getDefaultView());
             window.draw(gameover);
             window.draw(score);
+            playAgain.draw(window);
+            quit.draw(window);
+
+            if (quit.isPressed(window))
+            {
+                gameState = GameState::Menu;
+                break;
+            }
             break;
         }
         }
-        window.setView(window.getDefaultView());
         window.display();
     }
+}
+
+void initializeText(sf::Font &primary, AsteroidText &title, AsteroidText &score, AsteroidText &hp, AsteroidText &instructions, AsteroidText &paused, AsteroidText &gameover, sf::RenderWindow &window)
+{
+    primary.loadFromFile("../../asset-source/HyperspaceBold-GM0g.ttf");
+    title.setFont(primary);
+    score.setFont(primary);
+    hp.setFont(primary);
+    instructions.setFont(primary);
+    paused.setFont(primary);
+    gameover.setFont(primary);
+
+    title.setString("Asteroids");
+    title.setCharacterSize(100);
+    title.setOrigin(title.getLocalBounds().width / 2.f, 0);
+    title.setPosition(window.getSize().x / 2.f, 100);
+
+    paused.setString("Paused");
+    paused.setCharacterSize(100);
+    paused.setOrigin(paused.getLocalBounds().width / 2.f, 0);
+    paused.setPosition(window.getSize().x / 2.f, 100);
+
+    hp.setString("HP: 0");
+    hp.setCharacterSize(70);
+    hp.setOrigin(hp.getLocalBounds().width, 0);
+    hp.setPosition(window.getSize().x / 4.f - 200.f, 30.f);
+
+    score.setString("SCORE: 00000");
+    score.setCharacterSize(70);
+    score.setOrigin(score.getLocalBounds().width / 2.f, 0);
+    score.setPosition(((window.getSize().x) / 2.f), window.getSize().y - 300.f);
+
+    instructions.setString(
+        "     INSTRUCTIONS:\n\n"
+        "      Accelerate\n"
+        "           W           \n"
+        " Left -- A / D -- Right\n"
+        "        [Space]        \n"
+        "         Shoot         \n"
+        "\n"
+        " Shoot asteroids while\n"
+        " avoiding getting hit.\n\n"
+        " The more big asteroids \n"
+        " you shoot, that many \n"
+        " more will fly in! Pick\n"
+        " your targets wisely...\n"
+        "\n"
+        "        EXTRAS\n"
+        " Esc  -- Pause       \n"
+        "  P   -- Cycle colors\n");
+
+    instructions.setLineSpacing(.85f);
+    instructions.setCharacterSize(24);
+    instructions.setOrigin(instructions.getLocalBounds().width, 0);
+    instructions.setPosition(window.getSize().x - (20), 30.f);
+
+    gameover.setString("Game\nOver");
+    gameover.setCharacterSize(100);
+    gameover.setOrigin(gameover.getLocalBounds().width / 2.f, 0);
+    gameover.setPosition(window.getSize().x / 2.f, 100);
+}
+
+void cleanup(std::list<GameObject *> &gameObjects, std::list<Bullet *> &bullets, std::list<Asteroid *> &asteroids)
+{
+    for (GameObject *gameObject : gameObjects)
+    {
+        if (dynamic_cast<AccelerationLine *>(gameObject) != nullptr)
+        {
+            delete gameObject;
+            gameObject = nullptr;
+        }
+    }
+    gameObjects.remove_if([](GameObject *gameObject)
+                          { return gameObject == nullptr; });
+    for (Bullet *bullet : bullets)
+    {
+        delete bullet;
+    }
+    for (Asteroid *asteroid : asteroids)
+    {
+        delete asteroid;
+    }
+    asteroids.clear();
+    bullets.clear();
 }
