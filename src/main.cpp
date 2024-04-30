@@ -11,14 +11,15 @@
 #include "GameObjects/Asteroid.hpp"
 #include "Collision.hpp"
 #include "ColorShader.hpp"
+#include "AsteroidText.hpp"
 
 enum class GameState
 {
-    Menu = 1,
-    Paused = 2,
-    NewRound = 4,
-    Playing = 8,
-    GameOver = 16
+    Menu,
+    Paused,
+    NewRound,
+    Playing,
+    GameOver
 };
 
 unsigned int lives = 3;
@@ -33,14 +34,23 @@ std::list<Bullet *> *bulletAccessor;
 std::list<Asteroid *> *asteroidAccessor;
 std::list<GameObject *> *gameObjectAccessor;
 
-int asteroidLimit = 15;
-float asteroidSpawnCooldown = 5.f;
+float asteroid3SpawnCooldown = 5.f;
+float asteroid4SpawnCooldown = 6.f;
 
 // TO-DO: Move most of this logic to Game class
 int main()
 {
+    std::vector<ColorPalette> palettes = {ColorPalette::basic,
+                                          ColorPalette::bumblebit,
+                                          ColorPalette::coldlight,
+                                          ColorPalette::candy,
+                                          ColorPalette::rust,
+                                          ColorPalette::mushroom};
     GameState gameState = GameState::Playing;
-    Game::setColorPalette(ColorPalette::basic);
+    Asteroid::points = 0;
+    size_t colorPaletteIterator = 0;
+    bool paletteCycleLock = false;
+    Game::setColorPalette(palettes[colorPaletteIterator]);
     isFullScreen = false;
     auto window = sf::RenderWindow{{1920u, 1080u}, "Asteroids", sf::Style::Titlebar | sf::Style::Close}; // This is nice to avoid resizing issues
 
@@ -94,7 +104,32 @@ int main()
     test1.setLoop(true);
     test2.setLoop(true);
 
-    // test1.play();
+    sf::Font primary;
+    primary.loadFromFile("../../asset-source/HyperspaceBold-GM0g.ttf");
+    AsteroidText score, instructions, gameover;
+    score.setFont(primary);
+    instructions.setFont(primary);
+    gameover.setFont(primary);
+
+    instructions.setString(
+        "    INSTRUCTIONS:\n\n"
+        "     Accelerate\n"
+        "          W           \n"
+        "Left -- A / D -- Right\n"
+        "       [Space]        \n"
+        "        Shoot         \n"
+        "\n"
+        "       EXTRAS\n"
+        "  P   -- Cycle colors");
+    instructions.setLineSpacing(.9f);
+    instructions.setCharacterSize(24);
+    instructions.setOrigin(instructions.getLocalBounds().width, 0);
+    instructions.setPosition(window.getSize().x - 24.f, 30.f);
+
+    gameover.setString("Game\nOver");
+    gameover.setCharacterSize(100);
+    gameover.setOrigin(gameover.getLocalBounds().width / 2.f, 0);
+    gameover.setPosition(window.getSize().x / 2.f, 100);
 
     sf::Sound soundTest;
     sf::SoundBuffer soundTestBuffer;
@@ -109,25 +144,26 @@ int main()
     {
         gameObject->init();
     }
+
     player.init();
-    Asteroid* asteroid = new Asteroid(4);
-    asteroid->setVelocity(AsteroidMath::Vector2::ZERO);
-    asteroid->Object2D::setPosition({-300,-300});
+    new Asteroid(4);
+    new Asteroid(3);
 
     while (window.isOpen())
     {
+        window.clear();
         sf::Time elapsed = clock.restart();
+
         for (auto event = sf::Event{}; window.pollEvent(event);)
         {
             if (event.type == sf::Event::Closed)
             {
                 window.close();
             }
-            if (event.type == sf::Event::Resized)
-            {
-                gameView.setSize(event.size.width, event.size.height); // Currently unused since resizing is disabled. Wouldn't work in current state, since the gameView is set with some calculations.
-            }
         }
+
+        window.draw(door1_l, &colorShader);
+        window.draw(door1_r, &colorShader);
 
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::LAlt) && sf::Keyboard::isKeyPressed(sf::Keyboard::Enter))
         {
@@ -136,26 +172,85 @@ int main()
             window.setVerticalSyncEnabled(true);
             window.setFramerateLimit(144);
         }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::O))
-        {
-            Game::setColorPalette(ColorPalette::bumblebit);
-            Colorable::updateColorPalette(Game::getColorPalette());
-        }
 
-        window.clear();
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::P))
+        {
+            if (paletteCycleLock == false)
+            {
+                colorPaletteIterator = (colorPaletteIterator == palettes.size() - 1 ? 0 : colorPaletteIterator + 1);
+                Game::setColorPalette(palettes[colorPaletteIterator]);
+                Colorable::updateColorPalette(Game::getColorPalette());
+                paletteCycleLock = true;
+            }
+        }
+        else
+        {
+            paletteCycleLock = false;
+        }
 
         switch (gameState)
         {
         case GameState::Menu:
         {
+            window.draw(instructions);
+            if (true) // Menu stuff later
+            {
+                player.init();
+                gameState = GameState::NewRound;
+                break;
+            }
             break;
         }
         case GameState::NewRound:
         {
+            window.setView(gameView);
+            for (GameObject *gameObject : gameObjects)
+            {
+                gameObject->draw(window);
+            }
+            player.update(elapsed.asSeconds());
+            player.draw(window);
+
+            window.setView(window.getDefaultView());
+            window.draw(instructions);
+            if (player.state == Player::INITIALIZING)
+                break;
+            gameState = GameState::Playing;
             break;
         }
         case GameState::Playing:
         {
+            if (player.state == Player::DEAD)
+            {
+                std::cout << gameObjects.size();
+                for (GameObject *gameObject : gameObjects)
+                {
+                    if (dynamic_cast<AccelerationLine *>(gameObject) != nullptr)
+                    {
+                        std::cout << "Removed accelerationLine\n";
+                        delete gameObject;
+                    }
+                }
+                gameObjects.clear();
+                gameObjects.push_back(&stars); // Stupid hack
+                for (Bullet * bullet : bullets)
+                {
+                    delete bullet;
+                }
+                for (Asteroid * asteroid : asteroids)
+                {
+                    delete asteroid;
+                }
+                asteroids.clear();
+                bullets.clear();
+                gameState = GameState::GameOver;
+                break;
+            }
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))
+            {
+                gameState = GameState::Paused;
+                break;
+            }
             window.setView(gameView);
 
             asteroids.remove_if([](Asteroid *asteroid)
@@ -180,7 +275,6 @@ int main()
                     Collision::checkForCollision(&player, asteroid);
                 }
             }
-
             for (Bullet *bullet : bullets)
             {
                 bullet->update(elapsed.asSeconds());
@@ -197,22 +291,61 @@ int main()
                               { return bullet->queueDelete; });
             player.draw(window);
 
-            // if (asteroids.size() < asteroidLimit && asteroidSpawnCooldown < 0.f)
-            // {
-            //     new Asteroid(4);
-            //     asteroidSpawnCooldown = 5.f;
-            // }
-            // asteroidSpawnCooldown -= elapsed.asSeconds();
+            int asteroidPool3 = 0;
+            int asteroidPool4 = 0;
+            for (Asteroid *asteroid : asteroids)
+            {
+                if (asteroid->getSize() == 3)
+                    asteroidPool3++;
+                if (asteroid->getSize() == 4)
+                    asteroidPool4++;
+            }
+
+            if (asteroidPool3 < 3 && asteroid3SpawnCooldown <= 0.f)
+            {
+                new Asteroid(3);
+                asteroid3SpawnCooldown = 5.f;
+            }
+            if (asteroidPool4 < 2 && asteroid4SpawnCooldown <= 0.f)
+            {
+                new Asteroid(4);
+                asteroid4SpawnCooldown = 7.f;
+            }
+            asteroid3SpawnCooldown -= elapsed.asSeconds();
+            asteroid4SpawnCooldown -= elapsed.asSeconds();
+            break;
         }
         case GameState::Paused:
-            break;
-        case GameState::GameOver:
+        {
+            window.setView(gameView);
+            for (GameObject *gameObject : gameObjects)
+            {
+                gameObject->draw(window);
+            }
+            for (Bullet *bullet : bullets)
+            {
+                bullet->Object2D::draw(window);
+            }
+            for (Asteroid *asteroid : asteroids)
+            {
+                asteroid->Object2D::draw(window);
+            }
+            player.draw(window);
+
+            window.setView(window.getDefaultView());
+            window.draw(instructions);
             break;
         }
-
+        case GameState::GameOver:
+        {
+            window.setView(gameView);
+            stars.draw(window);
+            window.setView(window.getDefaultView());
+            window.draw(gameover);
+            break;
+        }
+        }
         window.setView(window.getDefaultView());
-        window.draw(door1_l, &colorShader);
-        window.draw(door1_r, &colorShader);
         window.display();
     }
     // main(); // Hell yeah
