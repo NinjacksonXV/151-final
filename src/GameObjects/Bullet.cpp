@@ -13,8 +13,6 @@ Bullet::Bullet(sf::Vector2f rotation, sf::Vector2f playerPosition)
     this->setPoint(2, {2.f, -5.f});
     this->setPoint(3, {-2.f, -5.f});
 
-    this->velocity = rotation;
-
     this->Object2D::setPosition(playerPosition + (rotation * 25.f));
     this->setOutlineColor(Game::getColorPalette().secondary);
     this->setOutlineThickness(-4);

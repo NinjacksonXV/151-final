@@ -13,8 +13,7 @@ public:
     void init() override{};
     void update(float deltaTime) override;
 
-    sf::Vector2f getVelocity() {return velocity;}
-
+    AsteroidMath::Vector2 getHeading() {return asAMVector2(travelRotation);}
     void impact();
     bool queueDelete = false;
     bool collidedThisFrame = false;
@@ -27,7 +26,6 @@ private:
         target.draw(*this, this->Object2D::getTransform());
     };
 
-    sf::Vector2f velocity;
 };
 
 extern std::list<Bullet *> *bulletAccessor;
