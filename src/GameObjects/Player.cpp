@@ -1,4 +1,5 @@
 #include "Player.hpp"
+#include <SFML/Audio.hpp>
 #include <math.h>
 
 // Script variables are here for ease of use.
@@ -29,12 +30,24 @@ AsteroidMath::Vector2 direction;
 int deathSpinDirection = 1;
 float postDeathDelay;
 
+sf::SoundBuffer deathAlarmBuffer;
+sf::Sound deathAlarm;
+
+sf::SoundBuffer shootBuffer;
+sf::Sound shootSound;
+
 float initializationTimer;
 
 Player::Player()
 {
-    this->impacts = 3;
     this->setPointCount(4);
+    deathAlarmBuffer.loadFromFile("../../asset-source/soundeffects/sfx_alarm_loop7.wav");
+    deathAlarm.setBuffer(deathAlarmBuffer);
+    deathAlarm.setLoop(true);
+
+    shootBuffer.loadFromFile("../../asset-source/soundeffects/sfx_sounds_impact1.wav");
+    shootSound.setBuffer(shootBuffer);
+    
     // When detecting collision, you need to transform these points by the player transform. Put this logic in GameplayShape
     setPoint(0, {-30, 10});
     setPoint(1, {0, -40});
@@ -44,11 +57,14 @@ Player::Player()
     setFillColor(Game::getColorPalette().primary);
     setOutlineColor(Game::getColorPalette().secondary);
     setOutlineThickness(4.0f);
-
 }
 void Player::init()
 {
+    this->impacts = 3;
+    deathState = false;
     Object2D::setPosition({0, 0});
+    this->setVelocity({0, 0});
+    this->Object2D::setRotation(0);
     state = INITIALIZING;
     initializationTimer = 1.5f;
     direction = AsteroidMath::Vector2::UP;
@@ -70,6 +86,7 @@ void Player::collided(sf::Vector2f impactVector, float magnitude)
     this->velocity += asAMVector2(impactVector) * knockback;
     if (impacts == 0)
     {
+        deathAlarm.play();
         deathState = true;
         deathSpinDirection = sign(impactVector.x);
         velocity = velocity.limitLength(maxSpeed);
@@ -98,7 +115,10 @@ void Player::dieAnimation(float delta)
         postDeathDelay -= delta;
     }
     else
+    {
         state = DEAD;
+        deathAlarm.stop();
+    }
 }
 
 void Player::update(float delta)
@@ -158,6 +178,7 @@ void Player::update(float delta)
         if (spacePressed == false)
         {
             new Bullet(direction, Object2D::getPosition());
+            shootSound.play();
             spacePressed = true;
         }
     }
