@@ -1,7 +1,9 @@
 #include "Object2D.hpp"
 
-// extern std::vector<GameObject *> *gameObjectAccessor;
-
+/**
+ * @brief Red dot used for testing
+ * 
+ */
 class Indicator : public Object2D, public sf::CircleShape
 {
 public:
@@ -16,7 +18,7 @@ public:
     };
 
 private:
-    void onDraw(sf::RenderTarget &target, const sf::Transform &transform) const 
+    void onDraw(sf::RenderTarget &target, const sf::Transform &) const 
     {
         target.draw(*this, this->Object2D::getTransform());
     }

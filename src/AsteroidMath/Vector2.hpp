@@ -27,15 +27,9 @@ namespace AsteroidMath
         AsteroidMath::Vector2 operator=(const sf::Vector2f &sfVector);
         void operator+=(const Vector2 &vector);
         void operator-=(const Vector2 &vector);
-
         Vector2 operator-(const Vector2 &vector);
 
-        float getDistanceTo(const sf::Vector2f &vector);
-        AsteroidMath::Vector2 operator*(auto scalar)
-        {
-            return {this->x * static_cast<float>(scalar), this->y * static_cast<float>(scalar)};
-        }
-
+        // auto expands to template argument types in C++ 20
         void operator*=(auto scalar)
         {
             this->setX(this->x * static_cast<float>(scalar));
@@ -49,6 +43,19 @@ namespace AsteroidMath
         {
             this->setX(this->x / static_cast<float>(scalar));
             this->setY(this->y / static_cast<float>(scalar));
+        }
+
+        /**
+         * @brief Get the distance to another vector
+         *
+         * @param vector
+         * @return float
+         */
+        float getDistanceTo(const sf::Vector2f &vector);
+
+        AsteroidMath::Vector2 operator*(auto scalar)
+        {
+            return {this->x * static_cast<float>(scalar), this->y * static_cast<float>(scalar)};
         }
 
         static const AsteroidMath::Vector2 UP;
@@ -76,22 +83,53 @@ namespace AsteroidMath
             return reinterpret_cast<sf::Vector2f *>(const_cast<Vector2 *>(this));
         }
 
+        /**
+         * @brief Rotate the vector.
+         *
+         * @param radians
+         */
         void rotate(float radians);
+
+        /**
+         * @brief Returns the vector with its length limited.
+         *
+         * @param limit
+         * @return AsteroidMath::Vector2
+         */
         AsteroidMath::Vector2 limitLength(float limit);
+
+        /**
+         * @brief Normalize the vector.
+         *
+         */
         void normalize();
+
+        /**
+         * @brief Return the vector as its normalized version.
+         *
+         * @return AsteroidMath::Vector2
+         */
         AsteroidMath::Vector2 normalized();
 
-
-        void updateLength();
-
+        /**
+         * @brief Get the angle in radians to another vector
+         * 
+         * @param vector 
+         * @return float 
+         */
         float getAngleTo(AsteroidMath::Vector2 &vector);
+
+        /**
+         * @brief Return the dot product of this vector and another vector.
+         * vector1.dotProduct(vector2) == vector2.dotProduct(vector1)
+         * 
+         * @param vector 
+         * @return float 
+         */
         float dotProduct(const AsteroidMath::Vector2 &vector);
 
-        // Functions to add:
-        // Vector2 reflect(Vector2 normal)
-        // {
-        //     return 2.0f * normal * this->dot(normal) - *this;
-        // };
+    private:
+        void updateLength();
         bool isCurrentLengthValid() const;
         void invalidateLength();
     };

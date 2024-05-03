@@ -16,8 +16,18 @@ public:
 
     void setColorPalette(const ColorPalette &colorPalette);
     size_t getCollisionPointCount() override { return 3; };
+
+    /**
+     * @brief Runs when the player is hit by an asteroid
+     *
+     * @param minTranslation The minimum translation vector
+     * @param magnitude The magnitude required to nudge the player out of the asteroid
+     */
     void collided(sf::Vector2f minTranslation, float magnitude);
 
+    /**
+     * @brief Returns the player health
+     */
     unsigned int getHP() { return this->impacts; }
 
     enum State
@@ -33,7 +43,6 @@ private:
     unsigned int impacts = 3;
 };
 
-// TO-DO: Move this into its own header/compilation unit. Actually... this is never getting done. Hah.
 /**
  * @brief This is the current star visual. It's essentially a rectangle that stays in the center of the screen, and takes in the player position to scroll
  * the UV of a (relatively) simple star shader. It gives a nice effect, and is cheap to draw.
@@ -77,7 +86,7 @@ private:
     mutable sf::Shader shader;
     mutable sf::RenderStates renderState;
 
-    void onDraw(sf::RenderTarget &target, const sf::Transform &transform) const
+    void onDraw(sf::RenderTarget &target, const sf::Transform &) const
     {
         renderState.transform = this->getTransform(); // Hack because this doesn't inherit from drawable
         shader.setUniform("position", sf::Vector2f(shaderPos.x, shaderPos.y * -1.f));

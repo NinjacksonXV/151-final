@@ -1,3 +1,11 @@
+/**
+ * @file main.cpp
+ * @author Jackson Breit (jbreit@nic.edu)
+ * @brief 
+ * @date 2024-04-02
+ * 
+ */
+
 #include <sstream>
 
 #include <SFML/Graphics.hpp>
