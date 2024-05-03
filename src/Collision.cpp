@@ -4,13 +4,6 @@
 bool Collision::checkForCollision(Bullet *bullet, Asteroid *asteroid)
 {
     int pos = 0, neg = 0;
-    bool entryPtLock = false;
-    // sf::Vector2f entryPt1, entryPt2;
-    size_t entryPt1 = 0;
-    size_t entryPt2 = 1;
-    float distance1 = 999999;
-    float distance2 = 999999;
-    float tempDistance1, tempDistance2;
 
     bool isInside = true;
     for (size_t i = 0; i < asteroid->getPointCount(); i++)
@@ -30,9 +23,9 @@ bool Collision::checkForCollision(Bullet *bullet, Asteroid *asteroid)
         float x = bullet->Object2D::getPosition().x;
         float y = bullet->Object2D::getPosition().y;
 
+        // Essentially make a raycast from the given point through the shape. 
         float crossProduct = (x - x1) * (y2 - y1) - (y - y1) * (x2 - x1);
-        tempDistance1 = sqrt(pow(x - x1, 2) + pow(y - y1, 2));
-        tempDistance2 = sqrt(pow(x - x2, 2) + pow(y - y2, 2));
+
         if (crossProduct > 0.f)
         {
             pos++;
@@ -43,32 +36,14 @@ bool Collision::checkForCollision(Bullet *bullet, Asteroid *asteroid)
         }
         if (pos > 0 && neg > 0)
             isInside = false;
-
-        if (tempDistance1 < distance1)
-        {
-            entryPt1 = i;
-            distance1 = tempDistance1;
-        }
-        if (tempDistance2 < distance2 && i2 != 0)
-        {
-            entryPt2 = i2;
-            distance2 = tempDistance2;
-        }
     }
     if (isInside)
     {
-        // std::cout << distance1 << " ";
-        // std::cout << distance2 << "\n";
-        // new Indicator(asteroid->getTransformedPoint(entryPt1));
-        // new Indicator(asteroid->getTransformedPoint(entryPt2));
-        // new Indicator(bullet->Object2D::getPosition());
-
         if (bullet->collidedThisFrame == false)
         {
             asteroid->impact(asAMVector2(bullet->getHeading().normalized()));
         }
         bullet->impact();
-        // asteroid->impact(bullet->Object2D::getPosition(), entryPt1, entryPt2);
     }
     return isInside;
 }
@@ -78,30 +53,35 @@ void Collision::checkForCollision(Player *player, Asteroid *asteroid)
     std::vector<sf::Vector2f> playerAxes = player->getAxes();
     std::vector<sf::Vector2f> asteroidAxes = asteroid->getAxes();
 
-    float overlap = 9999999;
-    sf::Vector2f smallest;
+    float overlap = 9999999; // Large value to find the minimum overlap for MTV
+    sf::Vector2f smallest;   // Vector tied to the smallest overlap 
     float tempOverlap;
 
     bool isColliding = true;
     for (size_t i = 0; i < playerAxes.size(); i++)
     {
         sf::Vector2f axis = playerAxes[i];
+
+        // Project the shapes onto the given axis
         Projection p1(*player, asAMVector2(axis));
         Projection p2(*asteroid, asAMVector2(axis));
 
         tempOverlap = p1.overlaps(p2);
         if (tempOverlap == 0.f)
         {
+            // if the overlap fails, then we're not colliding 
             isColliding = false;
             return;
         }
         else if (tempOverlap < overlap)
         {
+            // if the overlap is smaller than the current smallest one, it's the more accurate MTV 
             overlap = tempOverlap;
             smallest = {axis.x * -1, axis.y * -1};
         }
     }
 
+    // Do it again for the asteroid axes. 
     for (size_t i = 0; i < asteroidAxes.size(); i++)
     {
         sf::Vector2f axis = asteroidAxes[i];

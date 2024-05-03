@@ -1,3 +1,11 @@
+/**
+ * @brief Hexadecimal array for the game icon.
+ * 
+ * Generated with a PowerShell script that takes in an image data, and for each
+ * byte, adds its hexadecimal version with '0x' added to the front and ', ' to the 
+ * end and adds it to a string, which is then copied to the clipboard. 
+ * 
+ */
 static const struct {
   unsigned int 	 width;
   unsigned int 	 height;

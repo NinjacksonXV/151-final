@@ -5,6 +5,8 @@ set(OPENAL_PATH "C:/Development/Tools/ucrt64/bin/libopenal-1.dll" CACHE PATH "Pa
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
 
+add_compile_options(-pedantic -Werror -Wall -Wextra)
+
 file(GLOB_RECURSE SOURCES "src/*.cpp")
 
 add_executable(Asteroids ${SOURCES})

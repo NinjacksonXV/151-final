@@ -27,12 +27,29 @@ struct SizeVals
 class Asteroid : public GameplayShape
 {
 public:
+    /**
+     * @brief Instantiate an asteroid that spawns off-screen and flys inwards
+     *
+     * @param size Size of the asteroid to spawn
+     */
     Asteroid(unsigned int size);
+
+    /**
+     * @brief Construct a new Asteroid object
+     *
+     * @param size Size of the asteroid to spawn 
+     * @param position Position of the new asteroid
+     * @param direction Direction that the asteroid should fly in
+     */
     Asteroid(unsigned int size, sf::Vector2f position, sf::Vector2f direction);
     void setColorPalette(const ColorPalette &colorPalette);
     void update(float delta) override;
 
-    void impact(sf::Vector2f position, size_t point1, size_t point2);
+    /**
+     * @brief Runs when the asteroid
+     *
+     * @param bulletDirection
+     */
     void impact(AsteroidMath::Vector2 bulletDirection);
     bool queueDelete = false;
 
@@ -42,12 +59,15 @@ public:
 
 private:
     SizeVals size;
-    // void split();
     mutable sf::FloatRect rect;
-    sf::Vector2f calculateCentroid();
+    sf::Vector2f calculateCentroid(); // Unused
 
-    // void generatePolygon();
-    // void generateValtrPolygon();
+    /**
+     * @brief Generates a circle-based polygon.
+     *
+     * Source: https://observablehq.com/@magrawala/random-convex-polygon
+     *
+     */
     void circumCirclePolygon();
     bool checkIfHasNotBeenOnScreen();
     bool hasNotBeenOnScreen;

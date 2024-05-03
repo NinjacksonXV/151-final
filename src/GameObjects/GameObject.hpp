@@ -11,6 +11,7 @@ enum Flags
 class GameObject
 {
 public:
+    virtual ~GameObject() {};
     virtual void init() {}; // may be unnecessary? Putting logic in the constructor may be a better choice
     /**
      * @brief The core update loop..

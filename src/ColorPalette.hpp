@@ -2,6 +2,10 @@
 #include <string>
 #include <SFML/Graphics.hpp>
 
+/**
+ * @brief Struct that contains 3 `sf::Color`s
+ * 
+ */
 struct ColorPalette
 {
     std::string name;

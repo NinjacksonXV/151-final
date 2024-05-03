@@ -2,6 +2,10 @@
 #include "GameplayShape.hpp"
 #pragma once
 
+/**
+ * @brief These are what spawn behind the player.
+ * 
+ */
 class AccelerationLine : public GameplayShape
 {
     public:

@@ -45,5 +45,5 @@ private:
     static std::vector<Colorable *> colorables;
     static ColorPalette currentPalette;
 
-    void HandleCleanup();
+    
 };

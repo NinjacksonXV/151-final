@@ -32,7 +32,6 @@ public:
     virtual void update(float delta) override;
 
 protected:
-    Object2D *parent; // Currently unused.
     std::vector<Object2D *> children;
 
 private:
@@ -42,5 +41,5 @@ private:
      * @param target Render target to draw to, i.e. a window or a texture.
      * @param transform The resulting transform of this object's transform combined with the parent's transform, needed for accurate drawing results.  
      */
-    virtual void onDraw(sf::RenderTarget &target, const sf::Transform &transform) const {};
+    virtual void onDraw(sf::RenderTarget&, const sf::Transform &) const {};
 };

@@ -107,31 +107,15 @@ void Asteroid::update(float delta)
     }
 }
 
-/**
- * @brief Called when a bullet hits. Provides the position of the bullet during impact and the indices of the polygons where the collision occured.
- *
- * @param position
- * @param point1
- * @param point2
- */
-void Asteroid::impact(sf::Vector2f position, size_t point1, size_t point2)
-{
-    queueDelete = true;
-}
-
 void Asteroid::impact(AsteroidMath::Vector2 bulletDirection)
 {
     if (this->size.size > 1)
     {
         AsteroidMath::Vector2 direction1 = {bulletDirection.getY() * -1, bulletDirection.getX()};
-        AsteroidMath::Vector2 newPosition1 = direction1 * SizeVals::getSize(size.size - 1).maxRadius;
 
         AsteroidMath::Vector2 direction2 = direction1;
         direction2.rotate(M_PI);
         AsteroidMath::Vector2 newPosition2 = newPosition2 * SizeVals::getSize(size.size - 1).maxRadius;
-
-        sf::Vector2f temp1 = this->Object2D::getTransform().transformPoint(newPosition1);
-        sf::Vector2f temp2 = this->Object2D::getTransform().transformPoint(newPosition2);
 
         // Couldn't figure out how to offset the asteroids. Doesn't look bad, regardless.
         new Asteroid(size.size - 1, this->Object2D::getPosition(), direction1);
@@ -182,12 +166,6 @@ sf::Vector2f Asteroid::calculateCentroid()
     return centroid;
 }
 
-/**
- * @brief Generates a circle-based polygon.
- *
- * Source: https://observablehq.com/@magrawala/random-convex-polygon
- *
- */
 void Asteroid::circumCirclePolygon()
 {
     float tooCloseThresholdRad = 10.f * 3.14159625 / 180.f;

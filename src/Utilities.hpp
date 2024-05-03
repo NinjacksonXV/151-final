@@ -6,6 +6,9 @@
 #include <math.h>
 #include "AsteroidMath/Vector2.hpp"
 
+/**
+ * @brief Operator overload for an `sf::Vector2`
+ */
 template <typename T>
 std::ostream &operator<<(std::ostream &out, const sf::Vector2<T> &vector)
 {
@@ -13,6 +16,10 @@ std::ostream &operator<<(std::ostream &out, const sf::Vector2<T> &vector)
     return out;
 }
 
+/**
+ * @brief Operator overload for an `sf::Rect`
+
+ */
 template <typename T>
 std::ostream &operator<<(std::ostream &out, const sf::Rect<T> rect)
 {
