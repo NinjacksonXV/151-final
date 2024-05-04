@@ -1,7 +1,7 @@
 # 151 Final - Asteroids
 Project for the CS-151 final during my first year at North Idaho College, written in C++ and using [SFML](https://www.sfml-dev.org/).
 
-![](asset-source/Asteroids_LQoAUKlSQZ.gif)
+![](asset-source/Asteroids_A7PjmNN8Eq.gif)
 
 ![](asset-source/Asteroids_d4NzNC3XRB.png)
 
